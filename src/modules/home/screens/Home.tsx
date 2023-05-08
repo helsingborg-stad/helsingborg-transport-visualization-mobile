@@ -3,8 +3,11 @@ import { Feather } from '@expo/vector-icons';
 import styled from 'styled-components/native';
 import { useTheme } from 'styled-components';
 import { Icon, Screen, Button, LargeTitle, Body } from '@src/components';
+import { useAuthContext } from '@src/context/auth';
 
 export const HomeScreen: FC = () => {
+  const { logout } = useAuthContext();
+
   const [shouldAppCrash, setShouldAppCrash] = useState<boolean>(false);
 
   const theme = useTheme();
@@ -42,6 +45,11 @@ export const HomeScreen: FC = () => {
     setShouldAppCrash(true);
   };
 
+  const handleLogOut = () => {
+    //
+    logout();
+  };
+
   return (
     <StyledScreen preset="auto" safeAreaEdges={['top', 'bottom']}>
       <StyledTitle>Helsingborg</StyledTitle>
@@ -62,6 +70,7 @@ export const HomeScreen: FC = () => {
         To check the Error screen press the button below
       </StyledBodyCrashText>
 
+      <StyleButton title={'Log out'} onPress={handleLogOut} />
       <StyleButton title={'Click to Crash the app'} onPress={crashApp} />
     </StyledScreen>
   );
