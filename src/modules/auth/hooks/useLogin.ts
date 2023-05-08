@@ -23,7 +23,6 @@ export const useLogin: Hook = ({ onSuccess, onError }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const login = () => {
-    //
     setToken(tmpToken).then(() => {
       onSuccess?.();
       onError?.();

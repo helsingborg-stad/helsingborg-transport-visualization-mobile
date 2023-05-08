@@ -4,6 +4,7 @@ import {
   SafeAreaProvider,
 } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
+import { StatusBar } from 'expo-status-bar';
 import styled, { ThemeProvider } from 'styled-components/native';
 import { customFontsToLoad } from '@src/theme';
 import { ErrorBoundary } from '@src/modules/errorBoundary';
@@ -29,6 +30,7 @@ export default function App() {
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <ThemeProvider theme={theme}>
           <ErrorBoundary catchErrors={'always'}>
+            <StatusBar style="light" translucent />
             <Navigation />
           </ErrorBoundary>
         </ThemeProvider>
