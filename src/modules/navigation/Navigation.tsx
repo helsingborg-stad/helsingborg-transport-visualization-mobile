@@ -2,7 +2,6 @@ import React from 'react';
 import { ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import styled from 'styled-components/native';
-import { HomeStack } from './HomeStack';
 import { AuthStack } from './AuthStack';
 import { useAuthContext } from '@src/context/auth';
 
@@ -14,7 +13,7 @@ const Container = styled.View`
 `;
 
 export const Navigation = () => {
-  const { isLoggedIn, isLoading } = useAuthContext();
+  const { isLoading } = useAuthContext();
 
   if (isLoading) {
     return (
@@ -28,7 +27,8 @@ export const Navigation = () => {
   }
   return (
     <NavigationContainer>
-      {isLoggedIn ? <HomeStack /> : <AuthStack />}
+      {/* {!isLoggedIn ? <HomeStack /> : <AuthStack />} */}
+      <AuthStack />
     </NavigationContainer>
   );
 };
