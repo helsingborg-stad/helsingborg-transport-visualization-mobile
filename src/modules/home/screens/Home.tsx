@@ -2,7 +2,7 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import { Feather } from '@expo/vector-icons';
 import styled from 'styled-components/native';
 import { useTheme } from 'styled-components';
-import { Icon, Screen, Button, LargeTitle, Body } from '../components';
+import { Icon, Screen, Button, LargeTitle, Body } from '../../../components';
 
 export const HomeScreen: FC = () => {
   const [shouldAppCrash, setShouldAppCrash] = useState<boolean>(false);
