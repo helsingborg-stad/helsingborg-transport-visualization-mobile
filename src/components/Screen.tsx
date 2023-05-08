@@ -14,6 +14,7 @@ import {
   useSafeAreaInsetsStyle,
 } from '@src/utils/useSafeAreaInsetsStyle';
 import styled from 'styled-components/native';
+import theme from '@src/theme/Theme';
 
 interface BaseScreenProps {
   children?: React.ReactNode;
@@ -162,7 +163,7 @@ function ScreenWithScrolling(props: ScreenProps) {
 
 export function Screen(props: ScreenProps) {
   const {
-    backgroundColor,
+    backgroundColor = theme.colors.primary.background,
     KeyboardAvoidingViewProps,
     keyboardOffset = 0,
     safeAreaEdges,

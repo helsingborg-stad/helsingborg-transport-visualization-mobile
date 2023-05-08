@@ -6,9 +6,10 @@ const PRIMARY_DARK = '#224E80';
 const PRIMARY_BLUE_BLACK = '#0B1B2D';
 const PRIMARY_LIGHT = '#4F86C9';
 const PRIMARY_BACKGROUND = '#F5F5F5;';
+const PRIMARY_BACKGROUND_HIGHLIGHT = '#D1D1D1';
 const PRIMARY_HOVER = '#0A2756';
 const SECONDARY_MAIN = '#FCC91C';
-const TEXT_PRIMARY = '#030E30';
+const TEXT_PRIMARY = '#000';
 const TEXT_SECONDARY = 'rgba(0, 0, 0, 0.6)';
 const TEXT_DISABLED = 'rgba(0, 0, 0, 0.38)';
 const SUCCESS_MAIN = '#4CAF50';
@@ -37,12 +38,14 @@ const theme = {
       light: PRIMARY_LIGHT,
       hover: PRIMARY_HOVER,
       background: PRIMARY_BACKGROUND,
+      backgroundHighlight: PRIMARY_BACKGROUND_HIGHLIGHT,
     },
     secondary: { main: SECONDARY_MAIN },
     text: {
       primary: TEXT_PRIMARY,
       secondary: TEXT_SECONDARY,
       disabled: TEXT_DISABLED,
+      dimText: '#564E4A',
     },
     state: {
       success: SUCCESS_MAIN,
@@ -69,8 +72,6 @@ const theme = {
       '800': '#464648',
       '900': '#15223A',
     },
-    seperator: '#D7CEC9',
-    dimText: '#564E4A',
   },
   fontSizes: {
     xxl: '36px',
@@ -83,6 +84,7 @@ const theme = {
   },
   fonts: {
     regular: typography.primary.normal,
+    medium: typography.primary.medium,
     semibold: typography.primary.semiBold,
     bold: typography.primary.bold,
     // Just in case we need other varients

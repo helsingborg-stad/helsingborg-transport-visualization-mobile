@@ -20,16 +20,23 @@ export const Title = styled(Text)`
 `;
 
 export const SubTitle = styled(Text)`
-  font-family: ${({ theme }) => theme.fonts.bold};
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  line-height: ${({ theme }) => theme.lineHeights.lg};
-  letter-spacing: ${({ theme }) => theme.letterSpaces.lg};
+  font-family: ${({ theme }) => theme.fonts.medium};
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  line-height: ${({ theme }) => theme.lineHeights.md};
+  letter-spacing: ${({ theme }) => theme.letterSpaces.sm};
 `;
 
 export const Body = styled(Text)`
   font-family: ${({ theme }) => theme.fonts.regular};
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  line-height: ${({ theme }) => theme.lineHeights.sm};
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  line-height: ${({ theme }) => theme.lineHeights.md};
+  letter-spacing: ${({ theme }) => theme.letterSpaces.no};
+`;
+
+export const SubBody = styled(Text)`
+  font-family: ${({ theme }) => theme.fonts.regular};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  line-height: ${({ theme }) => theme.lineHeights.xs};
   letter-spacing: ${({ theme }) => theme.letterSpaces.no};
 `;
 

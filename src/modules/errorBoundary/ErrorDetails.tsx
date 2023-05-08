@@ -86,7 +86,7 @@ const StyledScrollView = styled.ScrollView.attrs(() => ({
 }))`
   width: 100%;
   flex: 2;
-  background-color: ${({ theme }) => theme.colors.seperator};
+  background-color: ${({ theme }) => theme.colors.primary.backgroundHighlight};
   margin-bottom: ${({ theme }) => theme.space.md};
   border-radius: ${({ theme }) => theme.radius.sm};
 `;
@@ -96,7 +96,7 @@ const StyledErrorTitle = styled(Body)`
   font-family: ${({ theme }) => theme.fonts.semibold};
 `;
 const StyledErrorText = styled(Body)`
-  color: ${({ theme }) => theme.colors.dimText};
+  color: ${({ theme }) => theme.colors.text.dimText};
   margin-top: ${({ theme }) => theme.space.md};
   font-family: ${({ theme }) => theme.fonts.regular};
 `;

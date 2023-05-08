@@ -1,53 +1,62 @@
 import React, { FC } from 'react';
 import styled from 'styled-components/native';
-// import { useTheme } from 'styled-components';
-import { Screen, Button, LargeTitle, Body } from '@src/components';
-import { useLogin } from '@src/modules/auth/hooks/useLogin';
+import { FontAwesome } from '@expo/vector-icons';
+import { Screen, LargeTitle, SubTitle, SubBody, Body } from '@src/components';
 
 export const LoginScreen: FC = () => {
-  // const theme = useTheme();
-
-  const { login, isLoading } = useLogin({
-    onSuccess: () => console.log('On Success Called'),
-    onError: () => console.log('On Error Called'),
-  });
-
-  const handleLogin = () => {
-    //
-    login({
-      email: 'me',
-      password: 'me',
-    });
-  };
-
   return (
     <StyledScreen preset="auto" safeAreaEdges={['top', 'bottom']}>
-      <StyledTitle>Login</StyledTitle>
-      <StyledBody>
-        Click the button below to Dummy Login - {isLoading}
-      </StyledBody>
+      <StyledTitle>Hej 👋</StyledTitle>
 
-      <StyleButton title={'Click to Crash the app'} onPress={handleLogin} />
+      <StyledSubTitle>Organisation du kör för</StyledSubTitle>
+
+      <OrganizationContainer>
+        <OrganizationText>Välj organisation</OrganizationText>
+        <FontAwesome name="angle-down" size={24} color="black" />
+      </OrganizationContainer>
+
+      <StyledSubTitle>Ange pinkod</StyledSubTitle>
+
+      <StyledSubBody>
+        Den sexsiffriga koden du loggar in med är angiven i instruktionsmejl/sms
+      </StyledSubBody>
     </StyledScreen>
   );
 };
 const StyledScreen = styled(Screen).attrs(() => ({
   contentContainerStyle: {
     paddingVertical: 22,
-    paddingHorizontal: 22,
-    alignItems: 'center',
+    paddingHorizontal: 30,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    flex: 1,
   },
 }))``;
 
 const StyledTitle = styled(LargeTitle)`
-  color: ${({ theme }) => theme.colors.primary.main};
+  margin: ${({ theme }) => `${theme.space.sm} 0 ${theme.space.xxl} 0`};
+`;
+
+const StyledSubTitle = styled(SubTitle)`
   margin: ${({ theme }) => `${theme.space.sm} 0`};
 `;
 
-const StyledBody = styled(Body)`
-  margin: ${({ theme }) => `${theme.space.sm} 0 ${theme.space.xl} 0`};
+const OrganizationContainer = styled.View`
+  width: 100%;
+  height: 54px;
+  background-color: ${({ theme }) => theme.colors.primary.backgroundHighlight};
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: ${({ theme }) => theme.space.md};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  margin-bottom: ${({ theme }) => theme.space.xl};
 `;
 
-const StyleButton = styled(Button)`
-  margin: ${({ theme }) => `${theme.space.lg} 0px`};
+const OrganizationText = styled(Body)`
+  flex: 1;
+`;
+
+const StyledSubBody = styled(SubBody)`
+  margin-bottom: ${({ theme }) => theme.space.md};
 `;
