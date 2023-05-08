@@ -40,6 +40,20 @@ export const SubBody = styled(Text)`
   letter-spacing: ${({ theme }) => theme.letterSpaces.no};
 `;
 
+export const Caption = styled(Text)`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  line-height: ${({ theme }) => theme.lineHeights.sm};
+  letter-spacing: ${({ theme }) => theme.letterSpaces.sm};
+`;
+
+export const CaptionBold = styled(Caption)`
+  font-family: ${({ theme }) => theme.fonts.bold};
+`;
+
+export const CaptionSmall = styled(Caption)`
+  font-size: ${({ theme }) => theme.fontSizes.xxs};
+`;
+
 export const ButtonText = styled(Text)`
   font-family: ${({ theme }) => theme.fonts.regular};
   color: ${({ theme }) => theme.colors.white};
