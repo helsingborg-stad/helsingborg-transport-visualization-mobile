@@ -9,6 +9,7 @@ import { customFontsToLoad } from './src/theme';
 import { ErrorBoundary } from './src/modules/errorBoundary';
 import theme from './src/theme/Theme';
 import { Navigation } from './src/modules/navigation';
+import AuthProvider from './src/context/auth/AuthState';
 
 export default function App() {
   const [areFontsLoaded] = useFonts(customFontsToLoad);
@@ -22,13 +23,15 @@ export default function App() {
     );
 
   return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <ThemeProvider theme={theme}>
-        <ErrorBoundary catchErrors={'always'}>
-          <Navigation />
-        </ErrorBoundary>
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <AuthProvider>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <ThemeProvider theme={theme}>
+          <ErrorBoundary catchErrors={'always'}>
+            <Navigation />
+          </ErrorBoundary>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </AuthProvider>
   );
 }
 

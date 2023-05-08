@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import styled from 'styled-components/native';
 import { HomeStack } from './HomeStack';
+import { AuthStack } from './AuthStack';
+import { useAuthContext } from '../../context/auth';
 
 const Container = styled.View`
   flex: 1;
@@ -12,13 +14,7 @@ const Container = styled.View`
 `;
 
 export const Navigation = () => {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-  }, []);
+  const { isLoggedIn, isLoading } = useAuthContext();
 
   if (isLoading) {
     return (
@@ -32,7 +28,7 @@ export const Navigation = () => {
   }
   return (
     <NavigationContainer>
-      <HomeStack />
+      {isLoggedIn ? <HomeStack /> : <AuthStack />}
     </NavigationContainer>
   );
 };
