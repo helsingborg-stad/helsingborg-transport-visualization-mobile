@@ -76,6 +76,7 @@ const StyleTitle = styled(Title)`
 
 const StyleBody = styled(Body)`
   margin: ${({ theme }) => `${theme.space.sm} 0`};
+  width: 100%;
 `;
 
 const StyledScrollView = styled.ScrollView.attrs(() => ({
@@ -83,18 +84,19 @@ const StyledScrollView = styled.ScrollView.attrs(() => ({
     padding: 16,
   },
 }))`
+  width: 100%;
   flex: 2;
   background-color: ${({ theme }) => theme.colors.seperator};
-  margin: ${({ theme }) => `${theme.space.md} 0`};
+  margin-bottom: ${({ theme }) => theme.space.md};
   border-radius: ${({ theme }) => theme.radius.sm};
 `;
 
 const StyledErrorTitle = styled(Body)`
   color: ${({ theme }) => theme.colors.primary.main};
-  font-family: ${({ theme }) => theme.fonts.code.normal};
+  font-family: ${({ theme }) => theme.fonts.semibold};
 `;
 const StyledErrorText = styled(Body)`
   color: ${({ theme }) => theme.colors.dimText};
   margin-top: ${({ theme }) => theme.space.md};
-  font-family: ${({ theme }) => theme.fonts.code.normal};
+  font-family: ${({ theme }) => theme.fonts.regular};
 `;
