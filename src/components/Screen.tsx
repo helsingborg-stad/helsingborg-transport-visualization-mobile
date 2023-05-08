@@ -12,7 +12,7 @@ import {
 import {
   ExtendedEdge,
   useSafeAreaInsetsStyle,
-} from '../utils/useSafeAreaInsetsStyle';
+} from '@src/utils/useSafeAreaInsetsStyle';
 import styled from 'styled-components/native';
 
 interface BaseScreenProps {

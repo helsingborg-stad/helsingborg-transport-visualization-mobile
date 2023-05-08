@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import styled from 'styled-components/native';
 // import { useTheme } from 'styled-components';
-import { Screen, Button, LargeTitle, Body } from '../../../components';
+import { Screen, Button, LargeTitle, Body } from '@src/components';
 
 export const LoginScreen: FC = () => {
   // const theme = useTheme();

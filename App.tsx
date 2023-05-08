@@ -5,16 +5,18 @@ import {
 } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import styled, { ThemeProvider } from 'styled-components/native';
-import { customFontsToLoad } from './src/theme';
-import { ErrorBoundary } from './src/modules/errorBoundary';
-import theme from './src/theme/Theme';
-import { Navigation } from './src/modules/navigation';
-import AuthProvider from './src/context/auth/AuthState';
+import { customFontsToLoad } from '@src/theme';
+import { ErrorBoundary } from '@src/modules/errorBoundary';
+import theme from '@src/theme/Theme';
+import { Navigation } from '@src/modules/navigation';
+import AuthProvider from '@src/context/auth/AuthState';
 
 export default function App() {
   const [areFontsLoaded] = useFonts(customFontsToLoad);
 
-  //Wait until our fonts are loaded
+  // Wait until our fonts are loaded
+  // We should add a proper screen or extend the Splash Screen
+  // for this purpise
   if (!areFontsLoaded)
     return (
       <Container>

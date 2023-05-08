@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import styled from 'styled-components/native';
 import { HomeStack } from './HomeStack';
 import { AuthStack } from './AuthStack';
-import { useAuthContext } from '../../context/auth';
+import { useAuthContext } from '@src/context/auth';
 
 const Container = styled.View`
   flex: 1;

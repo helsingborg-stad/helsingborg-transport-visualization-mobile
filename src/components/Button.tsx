@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, TouchableOpacityProps } from 'react-native';
 import { ButtonText, OutlinedButtonText } from './Text';
-import theme from '../theme/Theme';
+import theme from '@src/theme/Theme';
 import styled from 'styled-components/native';
 import { Icon } from './Icon';
 
