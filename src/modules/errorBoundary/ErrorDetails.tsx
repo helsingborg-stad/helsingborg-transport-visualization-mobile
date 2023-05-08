@@ -2,7 +2,7 @@ import React, { ErrorInfo, useMemo } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import styled from 'styled-components/native';
 import { useTheme } from 'styled-components';
-import { Icon, Screen, Button, Title, Body } from '../../components';
+import { Icon, Screen, Button, Title, Body } from '@src/components';
 
 export interface ErrorDetailsProps {
   error: Error;
