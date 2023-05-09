@@ -1,19 +1,20 @@
 import { typography } from './Typography';
 
 // COLORS
-const PRIMARY_MAIN = '#C03403';
+const PRIMARY_MAIN = '#000000';
 const PRIMARY_DARK = '#224E80';
 const PRIMARY_BLUE_BLACK = '#0B1B2D';
 const PRIMARY_LIGHT = '#4F86C9';
 const PRIMARY_BACKGROUND = '#F5F5F5;';
-const PRIMARY_BACKGROUND_HIGHLIGHT = '#D1D1D1';
+const PRIMARY_BACKGROUND_HIGHLIGHT = '#e5e5e5';
 const PRIMARY_HOVER = '#0A2756';
+const PRIMARY_BORDER_COLOR = '#A3A3A3';
 const SECONDARY_MAIN = '#FCC91C';
 const TEXT_PRIMARY = '#000';
 const TEXT_SECONDARY = 'rgba(0, 0, 0, 0.6)';
 const TEXT_DISABLED = 'rgba(0, 0, 0, 0.38)';
 const SUCCESS_MAIN = '#4CAF50';
-const ERROR_MAIN = '#F44336';
+const ERROR_MAIN = '#CC0000';
 const WARNING_LIGHT = '#FFB547';
 const WARNING_MAIN = '#F29102';
 const INFO_MAIN = '#4F86C9';
@@ -39,6 +40,7 @@ const theme = {
       hover: PRIMARY_HOVER,
       background: PRIMARY_BACKGROUND,
       backgroundHighlight: PRIMARY_BACKGROUND_HIGHLIGHT,
+      borderColor: PRIMARY_BORDER_COLOR,
     },
     secondary: { main: SECONDARY_MAIN },
     text: {

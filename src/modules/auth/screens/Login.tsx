@@ -13,11 +13,6 @@ import {
 export const LoginScreen: FC = () => {
   const [inputText1, setInputText1] = useState('');
   const [inputText2, setInputText2] = useState('');
-  const [inputText3, setInputText3] = useState('');
-  const [inputText4, setInputText4] = useState('');
-  const [inputText5, setInputText5] = useState('');
-  const [inputText6, setInputText6] = useState('');
-
   return (
     <StyledScreen preset="auto" safeAreaEdges={['top', 'bottom']}>
       <Wrapper>
@@ -37,35 +32,19 @@ export const LoginScreen: FC = () => {
           instruktionsmejl/sms
         </StyledSubBody>
         <InputTextContainer>
-          <MyInput
-            placeholder=""
+          <StyledInput
+            placeholder="1"
             value={inputText1}
             onChangeText={setInputText1}
+            maxLength={1}
+            keyboardType={'numeric'}
+            textAlign={'center'}
           />
-          <MyInput
-            placeholder=""
+          <StyledInput
+            placeholder="2"
             value={inputText2}
             onChangeText={setInputText2}
-          />
-          <MyInput
-            placeholder=""
-            value={inputText3}
-            onChangeText={setInputText3}
-          />
-          <MyInput
-            placeholder=""
-            value={inputText4}
-            onChangeText={setInputText4}
-          />
-          <MyInput
-            placeholder=""
-            value={inputText5}
-            onChangeText={setInputText5}
-          />
-          <MyInput
-            placeholder=""
-            value={inputText6}
-            onChangeText={setInputText6}
+            isError={true}
           />
         </InputTextContainer>
       </Wrapper>
@@ -124,6 +103,7 @@ const InputTextContainer = styled.View`
   gap: 10px;
 `;
 
-const MyInput = styled(Input)`
-  background-color: red;
+const StyledInput = styled(Input)`
+  /* background-color: red; */
+  flex: 1;
 `;
