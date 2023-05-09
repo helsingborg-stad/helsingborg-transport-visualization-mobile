@@ -63,7 +63,6 @@ const StyledInput = styled.TextInput<StyledInputProps>`
   flex: 1;
   border-radius: 5px;
   border: 1px solid #a3a3a3;
-  border-radius: 10px;
   background: #f7f7f8;
   font-family: ${({ theme }) => theme.fonts.regular};
   font-size: ${({ theme }) => theme.fontSizes.md};
