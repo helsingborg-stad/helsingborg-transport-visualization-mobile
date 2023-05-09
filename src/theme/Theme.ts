@@ -6,6 +6,7 @@ const PRIMARY_DARK = '#224E80';
 const PRIMARY_BLUE_BLACK = '#0B1B2D';
 const PRIMARY_LIGHT = '#4F86C9';
 const PRIMARY_BACKGROUND = '#F5F5F5;';
+const PRIMARY_MODAL_BACKGROUND = 'rgba(0, 0, 0, 0.5)';
 const PRIMARY_BACKGROUND_HIGHLIGHT = '#e5e5e5';
 const PRIMARY_HOVER = '#0A2756';
 const PRIMARY_BORDER_COLOR = '#A3A3A3';
@@ -41,6 +42,7 @@ const theme = {
       background: PRIMARY_BACKGROUND,
       backgroundHighlight: PRIMARY_BACKGROUND_HIGHLIGHT,
       borderColor: PRIMARY_BORDER_COLOR,
+      modalBackground: PRIMARY_MODAL_BACKGROUND,
     },
     secondary: { main: SECONDARY_MAIN },
     text: {

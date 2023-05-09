@@ -9,15 +9,24 @@ import {
   SubBody,
   Body,
   CaptionSmall,
+  Modal,
+  StyledModalChildContainer,
+  StyledModalBackDrop,
 } from '@src/components';
 import { PinCodeInput } from '../components/PinCodeInput';
 
 export const LoginScreen: FC = () => {
   const [pin, setPin] = useState('');
   const [isError, setIsError] = useState(false);
+  const [showOrganizationPopup, setShowOrganizationPopup] = useState(false);
 
   const handlePinFinished = (pin: string) => {
     setPin(pin);
+  };
+
+  const handleOrganizationClick = () => {
+    console.log('Clicked');
+    setShowOrganizationPopup(true);
   };
 
   const handlePinSubmit = () => {
@@ -36,10 +45,12 @@ export const LoginScreen: FC = () => {
 
         <StyledSubTitle>Organisation du kör för</StyledSubTitle>
 
-        <OrganizationContainer>
-          <OrganizationText>Välj organisation</OrganizationText>
-          <FontAwesome name="angle-down" size={24} color="black" />
-        </OrganizationContainer>
+        <StyledOrganizationPressable onPress={handleOrganizationClick}>
+          <OrganizationContainer isFocused={showOrganizationPopup}>
+            <OrganizationText>Välj organisation</OrganizationText>
+            <FontAwesome name="angle-down" size={24} color="black" />
+          </OrganizationContainer>
+        </StyledOrganizationPressable>
 
         <StyledSubTitle>Ange pinkod</StyledSubTitle>
 
@@ -64,6 +75,11 @@ export const LoginScreen: FC = () => {
           />
         )}
       </Wrapper>
+
+      <StyledModal visible={showOrganizationPopup}>
+        <StyledModalBackDrop onPress={() => setShowOrganizationPopup(false)} />
+        <StyledModalChildContainer></StyledModalChildContainer>
+      </StyledModal>
     </StyledScreen>
   );
 };
@@ -77,6 +93,17 @@ const StyledScreen = styled(Screen).attrs(() => ({
   },
 }))``;
 
+const StyledModal = styled(Modal)``;
+
+// const StyledModalBackDrop = styled.View`
+//   background-color: red;
+//   flex: 1;
+// `;
+
+type OrganizationContainerProps = {
+  isFocused?: boolean;
+};
+
 const Wrapper = styled.View`
   width: 100%;
 `;
@@ -89,15 +116,19 @@ const StyledSubTitle = styled(SubTitle)`
   margin: ${({ theme }) => `${theme.space.sm} 0`};
 `;
 
-const OrganizationContainer = styled.View`
+const StyledOrganizationPressable = styled.TouchableOpacity``;
+
+const OrganizationContainer = styled.View<OrganizationContainerProps>`
   width: 100%;
-  height: 54px;
   background-color: ${({ theme }) => theme.colors.primary.backgroundHighlight};
   flex-direction: row;
   justify-content: center;
   align-items: center;
   padding: ${({ theme }) => theme.space.md};
+  border-width: 1px;
   border-radius: ${({ theme }) => theme.radius.lg};
+  border-color: ${({ theme, isFocused }) =>
+    isFocused ? theme.colors.primary.main : 'transparent'};
   margin-bottom: ${({ theme }) => theme.space.xl};
 `;
 
