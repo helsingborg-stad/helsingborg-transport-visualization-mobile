@@ -25,6 +25,7 @@ export const LoginScreen: FC = () => {
 
     if (pin !== '123456') {
       setIsError(true);
+      setPin('');
     }
   };
 

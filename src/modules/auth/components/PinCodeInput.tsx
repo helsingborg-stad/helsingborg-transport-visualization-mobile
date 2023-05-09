@@ -50,13 +50,22 @@ export const PinCodeInput: React.FC<PinCodeInputProps> = ({
   useEffect(() => {
     setCurrentPinIndex(-1);
     const interval = setInterval(() => {
-      //   console.log('Interval called');
       setShowCaret((v) => !v);
     }, 800);
     return () => {
       clearInterval(interval);
     };
   }, []);
+
+  // if there is an error
+  // clear the pin and move the cursor and move the cursor
+  // to first pin box and show keyboard
+  useEffect(() => {
+    if (isError) {
+      setInputText('');
+      inputRef.current.focus();
+    }
+  }, [isError]);
 
   // To show the keyboard when PinCode boxes are pressed
   const handleOnPress = () => {
