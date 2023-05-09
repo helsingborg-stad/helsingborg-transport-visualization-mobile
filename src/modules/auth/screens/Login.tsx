@@ -1,6 +1,8 @@
 import React, { FC, useState } from 'react';
 import styled from 'styled-components/native';
 import { FontAwesome } from '@expo/vector-icons';
+import WheelPicker from 'react-native-wheely';
+
 import {
   Button,
   Screen,
@@ -10,23 +12,42 @@ import {
   Body,
   CaptionSmall,
   Modal,
-  StyledModalChildContainer,
-  StyledModalBackDrop,
+  ModalChildContainer,
+  ModalBackDrop,
 } from '@src/components';
 import { PinCodeInput } from '../components/PinCodeInput';
+import { useTheme } from 'styled-components';
 
 export const LoginScreen: FC = () => {
+  const theme = useTheme();
+
   const [pin, setPin] = useState('');
   const [isError, setIsError] = useState(false);
   const [showOrganizationPopup, setShowOrganizationPopup] = useState(false);
+  const [currentOrgIndex, setCurrentOrgIndex] = useState(-1);
+  const organiazation = [
+    'Grönsakshallen',
+    'Menigo',
+    'Skånemejerier',
+    'Tonys budbil',
+    'Uber',
+    'Dummy Organization 1',
+    'Dummy Organization 2',
+    'Dummy Organization 3',
+    'Dummy Organization 4',
+    'Dummy Organization 5',
+  ];
 
   const handlePinFinished = (pin: string) => {
+    setIsError(false);
     setPin(pin);
   };
 
   const handleOrganizationClick = () => {
-    console.log('Clicked');
     setShowOrganizationPopup(true);
+    if (currentOrgIndex === -1) {
+      setCurrentOrgIndex(0);
+    }
   };
 
   const handlePinSubmit = () => {
@@ -47,7 +68,11 @@ export const LoginScreen: FC = () => {
 
         <StyledOrganizationPressable onPress={handleOrganizationClick}>
           <OrganizationContainer isFocused={showOrganizationPopup}>
-            <OrganizationText>Välj organisation</OrganizationText>
+            <OrganizationText>
+              {currentOrgIndex === -1
+                ? 'Välj organisation'
+                : organiazation[currentOrgIndex]}
+            </OrganizationText>
             <FontAwesome name="angle-down" size={24} color="black" />
           </OrganizationContainer>
         </StyledOrganizationPressable>
@@ -77,8 +102,20 @@ export const LoginScreen: FC = () => {
       </Wrapper>
 
       <StyledModal visible={showOrganizationPopup}>
-        <StyledModalBackDrop onPress={() => setShowOrganizationPopup(false)} />
-        <StyledModalChildContainer></StyledModalChildContainer>
+        <ModalBackDrop onPress={() => setShowOrganizationPopup(false)} />
+        <StyledModalChildContainer>
+          <WheelPicker
+            selectedIndex={currentOrgIndex}
+            options={organiazation}
+            onChange={(index) => setCurrentOrgIndex(index)}
+            visibleRest={2}
+            itemHeight={45}
+            itemTextStyle={{
+              fontFamily: theme.fonts.regular,
+              fontSize: 18,
+            }}
+          />
+        </StyledModalChildContainer>
       </StyledModal>
     </StyledScreen>
   );
@@ -94,11 +131,6 @@ const StyledScreen = styled(Screen).attrs(() => ({
 }))``;
 
 const StyledModal = styled(Modal)``;
-
-// const StyledModalBackDrop = styled.View`
-//   background-color: red;
-//   flex: 1;
-// `;
 
 type OrganizationContainerProps = {
   isFocused?: boolean;
@@ -157,4 +189,9 @@ const StyleButton = styled(Button)`
   width: 60%;
   margin: ${({ theme }) => `${theme.space.xxl} 0px ${theme.space.lg} 0px`};
   align-self: center;
+`;
+
+const StyledModalChildContainer = styled(ModalChildContainer)`
+  padding-top: ${({ theme }) => theme.space.xl};
+  padding-bottom: ${({ theme }) => theme.space.xl};
 `;

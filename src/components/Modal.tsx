@@ -9,13 +9,12 @@ interface ModalProps extends ModalBaseProps {
   children: React.ReactNode;
 }
 
-export const StyledModalBackDrop = styled.Pressable`
+export const ModalBackDrop = styled.Pressable`
   background-color: ${({ theme }) => theme.colors.primary.modalBackground};
   flex: 1;
 `;
 
-export const StyledModalChildContainer = styled.View`
-  padding: ${({ theme }) => theme.space.md};
+export const ModalChildContainer = styled.View`
   background-color: white;
 `;
 
