@@ -55,7 +55,7 @@ export const CaptionSmall = styled(Caption)`
 `;
 
 export const ButtonText = styled(Text)`
-  font-family: ${({ theme }) => theme.fonts.regular};
+  font-family: ${({ theme }) => theme.fonts.medium};
   color: ${({ theme }) => theme.colors.white};
   font-size: ${({ theme }) => theme.fontSizes.md};
   line-height: ${({ theme }) => theme.lineHeights.md};

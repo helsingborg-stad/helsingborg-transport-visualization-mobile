@@ -2,17 +2,32 @@ import React, { FC, useState } from 'react';
 import styled from 'styled-components/native';
 import { FontAwesome } from '@expo/vector-icons';
 import {
+  Button,
   Screen,
   LargeTitle,
   SubTitle,
   SubBody,
   Body,
-  Input,
+  CaptionSmall,
 } from '@src/components';
+import { PinCodeInput } from '../components/PinCodeInput';
 
 export const LoginScreen: FC = () => {
-  const [inputText1, setInputText1] = useState('');
-  const [inputText2, setInputText2] = useState('');
+  const [pin, setPin] = useState('');
+  const [isError, setIsError] = useState(false);
+
+  const handlePinFinished = (pin: string) => {
+    setPin(pin);
+  };
+
+  const handlePinSubmit = () => {
+    setIsError(false);
+
+    if (pin !== '123456') {
+      setIsError(true);
+    }
+  };
+
   return (
     <StyledScreen preset="auto" safeAreaEdges={['top', 'bottom']}>
       <Wrapper>
@@ -32,21 +47,21 @@ export const LoginScreen: FC = () => {
           instruktionsmejl/sms
         </StyledSubBody>
         <InputTextContainer>
-          <StyledInput
-            placeholder="1"
-            value={inputText1}
-            onChangeText={setInputText1}
-            maxLength={1}
-            keyboardType={'numeric'}
-            textAlign={'center'}
-          />
-          <StyledInput
-            placeholder="2"
-            value={inputText2}
-            onChangeText={setInputText2}
-            isError={true}
-          />
+          <PinCodeInput isError={isError} onFinish={handlePinFinished} />
         </InputTextContainer>
+
+        {isError && (
+          <StyledErrorText>
+            Fel pinkod - kolla att du valt rätt organisation och testa igen.
+          </StyledErrorText>
+        )}
+        {pin && (
+          <StyleButton
+            title={'Starta körning'}
+            onPress={handlePinSubmit}
+            type="primary"
+          />
+        )}
       </Wrapper>
     </StyledScreen>
   );
@@ -54,7 +69,7 @@ export const LoginScreen: FC = () => {
 const StyledScreen = styled(Screen).attrs(() => ({
   contentContainerStyle: {
     paddingVertical: 22,
-    paddingHorizontal: 30,
+    paddingHorizontal: 22,
     alignItems: 'flex-start',
     justifyContent: 'center',
     flex: 1,
@@ -98,12 +113,16 @@ const InputTextContainer = styled.View`
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding-top: ${({ theme }) => theme.space.md};
-  padding-bottom: ${({ theme }) => theme.space.md};
-  gap: 10px;
+  padding-top: ${({ theme }) => theme.space.sm};
+  padding-bottom: ${({ theme }) => theme.space.sm};
 `;
 
-const StyledInput = styled(Input)`
-  /* background-color: red; */
-  flex: 1;
+const StyledErrorText = styled(CaptionSmall)`
+  color: ${({ theme }) => theme.colors.state.error};
+`;
+
+const StyleButton = styled(Button)`
+  width: 60%;
+  margin: ${({ theme }) => `${theme.space.xxl} 0px ${theme.space.lg} 0px`};
+  align-self: center;
 `;
