@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "HelsingborgApp",
-    "slug": "HelsingborgApp",
+    "slug": "helsingborg-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,16 +15,24 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "works.hbg.sam"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "works.hbg.sam"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "66d00a50-a329-4419-b6b6-b59557721210"
+      }
+    },
+    "owner": "helsingborg"
   }
 }

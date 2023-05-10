@@ -17,6 +17,7 @@ import {
 } from '@src/components';
 import { PinCodeInput } from '../components/PinCodeInput';
 import { useTheme } from 'styled-components';
+import { useDelegateErrorToRender } from '@src/hooks/useDelegateErrorToRender';
 
 export const LoginScreen: FC = () => {
   const theme = useTheme();
@@ -25,6 +26,8 @@ export const LoginScreen: FC = () => {
   const [isError, setIsError] = useState(false);
   const [showOrganizationPopup, setShowOrganizationPopup] = useState(false);
   const [currentOrgIndex, setCurrentOrgIndex] = useState(-1);
+  const [errorToThrow, setErrorToThrow] = useState<any>(null);
+  useDelegateErrorToRender(errorToThrow);
   const organiazation = [
     'Grönsakshallen',
     'Menigo',
@@ -52,11 +55,13 @@ export const LoginScreen: FC = () => {
 
   const handlePinSubmit = () => {
     setIsError(false);
-
     if (pin !== '123456') {
       setIsError(true);
       setPin('');
     }
+    setErrorToThrow(
+      'Some Error that was thrown and we did not handle, i-e: Background service, user location, network'
+    );
   };
 
   return (
