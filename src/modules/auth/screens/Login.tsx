@@ -1,5 +1,4 @@
 import React, { FC, useState } from 'react';
-import Constants from 'expo-constants';
 import styled from 'styled-components/native';
 import { FontAwesome } from '@expo/vector-icons';
 import WheelPicker from 'react-native-wheely';
@@ -42,7 +41,6 @@ export const LoginScreen: FC = () => {
     'Dummy Organization 5',
   ];
 
-  console.log('Constants', Constants.expoConfig.extra);
   const handlePinFinished = (pin: string) => {
     setIsError(false);
     setPin(pin);
@@ -70,7 +68,6 @@ export const LoginScreen: FC = () => {
     <StyledScreen preset="auto" safeAreaEdges={['top', 'bottom']}>
       <Wrapper>
         <StyledTitle>Hej 👋</StyledTitle>
-        <StyledTitle>{Constants.expoConfig.extra.API_URL}</StyledTitle>
 
         <StyledSubTitle>Organisation du kör för</StyledSubTitle>
 
