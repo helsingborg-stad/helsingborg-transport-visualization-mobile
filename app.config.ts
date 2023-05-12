@@ -29,8 +29,8 @@ const getEnvVars = (env = process.env.APP_ENV) => {
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  slug: 'HelsingborgApp',
-  name: 'helsingborg-app',
+  slug: 'helsingborg-app',
+  name: 'Sam',
   extra: {
     eas: {
       projectId: getEnvVars().easProjectID,

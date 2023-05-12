@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuthContext } from '@src/context/auth/AuthState';
+// import { useMutation } from 'react-query';
 
 type HookParams = {
   onSuccess?: () => void;
@@ -7,13 +8,13 @@ type HookParams = {
 };
 
 type LoginRequest = {
-  email: string;
-  password: string;
+  indentifier: string;
+  pinCode: string;
 };
 
 type Hook = (params: HookParams) => {
   isLoading: boolean;
-  login: ({ email, password }: LoginRequest) => void;
+  login: ({ indentifier, pinCode }: LoginRequest) => void;
 };
 
 export const useLogin: Hook = ({ onSuccess, onError }) => {
