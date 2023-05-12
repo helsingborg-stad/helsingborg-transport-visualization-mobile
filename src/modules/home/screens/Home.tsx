@@ -3,6 +3,7 @@ import styled from 'styled-components/native';
 import { SubTitle, Screen, LargeTitle, Body, Button } from '@src/components';
 import Slider from '@react-native-community/slider';
 import { useTheme } from 'styled-components';
+import { Platform } from 'react-native';
 
 export const HomeScreen: FC = () => {
   const [isTracking, setIsTracking] = useState(false);
@@ -73,11 +74,12 @@ export const HomeScreen: FC = () => {
         </TimerContainer>
         <StyledBodyText>{timeLeft}</StyledBodyText>
         <SliderContainer>
-          <Slider
-            style={{ width: 300, height: 20 }}
+          <StyledSlider
+            // style={{ width: '100%', height: 40 }}
             minimumValue={0}
             maximumValue={12}
             value={8}
+            thumbTintColor={theme.colors.primary.main}
             minimumTrackTintColor={theme.colors.primary.main}
             maximumTrackTintColor={theme.colors.primary.backgroundHighlight}
             onValueChange={(val) => setHoursToTrack(val)}
@@ -137,13 +139,19 @@ const StyledRangeText = styled(Body)`
 `;
 
 const SliderContainer = styled.View`
+  width: 100%;
   margin-top: ${({ theme }) => theme.space.xxl};
+  padding: ${({ theme }) => `0 ${theme.space.lg}`};
+  justify-content: center;
+  align-items: center;
 `;
 
 const SliderMinMaxContiner = styled.View`
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  padding: ${({ theme }) =>
+    `0 ${Platform.OS !== 'ios' ? theme.space.md : '0px'}`};
 `;
 
 const Filler = styled.View`
@@ -155,4 +163,9 @@ const StyleButton = styled(Button)`
   width: 60%;
   margin-top: ${({ theme }) => theme.space.xxxl};
   align-self: center;
+`;
+
+const StyledSlider = styled(Slider)`
+  width: 100%;
+  height: 40px;
 `;
