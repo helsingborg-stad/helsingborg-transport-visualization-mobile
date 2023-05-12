@@ -1,29 +1,87 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import styled from 'styled-components/native';
 import { SubTitle, Screen, LargeTitle, Body, Button } from '@src/components';
 import Slider from '@react-native-community/slider';
-// import { useAuthContext } from '@src/context/auth';
+import { useTheme } from 'styled-components';
 
 export const HomeScreen: FC = () => {
-  // const { logout } = useAuthContext();
   const [isTracking, setIsTracking] = useState(false);
+  const [currentStopTrackingTime, setCurrentStopTrackingTime] = useState('');
+  const [hoursToTrack, setHoursToTrack] = useState(8);
+  const [timeLeft, setTimeLeft] = useState('');
+  const [endTime, setEndTime] = useState(null);
+  const theme = useTheme();
+
+  useEffect(() => {
+    const StopTimeForamated = calculateHoursToStopTracking(hoursToTrack);
+    setCurrentStopTrackingTime(StopTimeForamated);
+  }, [hoursToTrack]);
+
+  //Get Time Remaining
+  useEffect(() => {
+    const today = new Date();
+    const timeLeft = getTimeDifference(today, endTime);
+    setTimeLeft(timeLeft);
+  }, [endTime]);
+
+  //Set an interval to auto calculate the time remaning
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const today = new Date();
+      const timeLeft = getTimeDifference(today, endTime);
+      setTimeLeft(timeLeft);
+    }, 1000 * 60);
+    return () => clearInterval(interval);
+  }, []);
+
+  const calculateHoursToStopTracking = (hours: number) => {
+    const hoursToAdd = 1000 * 60 * 60 * hours;
+    const today = new Date();
+    const stopTime = new Date(today.getTime() + hoursToAdd);
+
+    let StopTimeForamated = stopTime.toLocaleString([], {
+      hour12: false,
+    });
+    StopTimeForamated = StopTimeForamated.slice(12).slice(0, -3);
+    setEndTime(stopTime);
+    return StopTimeForamated;
+  };
+
+  const getTimeDifference = (startTime, endTime) => {
+    const difference = endTime - startTime;
+    const differenceInMinutes = difference / 1000 / 60;
+    let hours = Math.floor(differenceInMinutes / 60);
+    if (hours < 0) {
+      hours = 24 + hours;
+    }
+    let minutes = Math.floor(differenceInMinutes % 60);
+    if (minutes < 0) {
+      minutes = 60 + minutes;
+    }
+    const hoursAndMinutes = `om ${hours} tim ${
+      (minutes < 10 ? '0' : '') + minutes
+    } min`;
+    return hoursAndMinutes;
+  };
 
   return (
     <StyledScreen preset="auto" safeAreaEdges={['top', 'bottom']}>
       <Wrapper>
         <StyledSubTitle>Automatisk stopptid</StyledSubTitle>
         <TimerContainer>
-          <StyledTimerText>14:05</StyledTimerText>
+          <StyledTimerText>{currentStopTrackingTime}</StyledTimerText>
         </TimerContainer>
-        <StyledBodyText>om 3 tim 20 min</StyledBodyText>
+        <StyledBodyText>{timeLeft}</StyledBodyText>
         <SliderContainer>
           <Slider
             style={{ width: 300, height: 20 }}
             minimumValue={0}
             maximumValue={12}
             value={8}
-            minimumTrackTintColor="#2E2E2E"
-            maximumTrackTintColor="rgba(120, 120, 128, 0.36)"
+            minimumTrackTintColor={theme.colors.primary.main}
+            maximumTrackTintColor={theme.colors.primary.backgroundHighlight}
+            onValueChange={(val) => setHoursToTrack(val)}
+            step={1}
           />
           <SliderMinMaxContiner>
             <StyledRangeText>0 h</StyledRangeText>
