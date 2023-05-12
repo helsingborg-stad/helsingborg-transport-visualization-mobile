@@ -17,10 +17,13 @@ import {
 } from '@src/components';
 import { PinCodeInput } from '../components/PinCodeInput';
 import { useTheme } from 'styled-components';
+import { useAuthContext } from '@src/context/auth';
 // import { useDelegateErrorToRender } from '@src/hooks/useDelegateErrorToRender';
+// import { useLogin } from '../hooks/useLogin';
 
 export const LoginScreen: FC = () => {
   const theme = useTheme();
+  const { setToken } = useAuthContext();
 
   const [pin, setPin] = useState('');
   const [isError, setIsError] = useState(false);
@@ -41,6 +44,11 @@ export const LoginScreen: FC = () => {
     'Dummy Organization 5',
   ];
 
+  // const { login, isLoading } = useLogin({
+  //   onSuccess: () => console.log('success'),
+  //   onError: () => console.log('success'),
+  // });
+
   const handlePinFinished = (pin: string) => {
     setIsError(false);
     setPin(pin);
@@ -58,6 +66,9 @@ export const LoginScreen: FC = () => {
     if (pin !== '123456') {
       setIsError(true);
       setPin('');
+      //
+    } else {
+      setToken('token');
     }
     // setErrorToThrow(
     //   'Some Error that was thrown and we did not handle, i-e: Background service, user location, network'

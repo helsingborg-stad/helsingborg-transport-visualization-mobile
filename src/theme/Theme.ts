@@ -29,6 +29,7 @@ const theme = {
     lg: '22px',
     xl: '30px',
     xxl: '64px',
+    xxxl: '128px',
   },
   colors: {
     black: '#000',

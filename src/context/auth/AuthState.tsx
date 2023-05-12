@@ -46,6 +46,7 @@ export const AuthStore = () => {
   }, []);
 
   const setToken = async (token: string) => {
+    console.log('token', token);
     try {
       setIsLoading(true);
       await SecureStore.setItemAsync('token', token);
@@ -61,6 +62,7 @@ export const AuthStore = () => {
   };
 
   const logout = async () => {
+    console.log('Logged out');
     try {
       setIsLoading(true);
       await SecureStore.deleteItemAsync('token');
