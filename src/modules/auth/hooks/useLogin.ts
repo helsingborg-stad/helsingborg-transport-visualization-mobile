@@ -1,50 +1,51 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useAuthContext } from '@src/context/auth/AuthState';
-// import { useMutation } from 'react-query';
-
+import api from '@src/api';
+import { useMutation } from '@tanstack/react-query';
 type HookParams = {
   onSuccess?: () => void;
   onError?: () => void;
+  userPin: string;
 };
 
 type LoginRequest = {
-  indentifier: string;
+  identifier: string;
   pinCode: string;
 };
 
 type Hook = (params: HookParams) => {
   isLoading: boolean;
-  login: ({ indentifier, pinCode }: LoginRequest) => void;
+  login: ({ identifier, pinCode }: LoginRequest) => void;
 };
 
-export const useLogin: Hook = ({ onSuccess, onError }) => {
+export const useLogin: Hook = ({ onSuccess, onError, userPin }) => {
   const { setUser } = useAuthContext();
-  const user = {
-    token: '',
-    isLoggedIn: true,
-    id: '1',
-    orgNumber: '11',
-    pin: '123123',
-    email: '123123',
-    name: '123123',
-    createdAt: '',
-    updatedAt: '',
-  };
 
-  const [isLoading, setIsLoading] = useState(true);
-
-  const login = () => {
-    setUser(user).then(() => {
-      onSuccess?.();
+  const {
+    data: user,
+    mutate: login,
+    isLoading,
+  } = useMutation({
+    mutationKey: ['login'],
+    mutationFn: ({ identifier, pinCode }: LoginRequest) => {
+      return api.login({ identifier, pinCode });
+    },
+    onError: () => {
       onError?.();
-    });
-  };
+    },
+  });
 
   useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-  }, []);
+    if (!user) {
+      return;
+    }
+    const extraKeys = { pin: userPin, isLoggedIn: true };
+    const userObj = { ...user, ...extraKeys };
+
+    setUser(userObj).then(() => {
+      onSuccess?.();
+    });
+  }, [user]);
 
   return {
     isLoading,

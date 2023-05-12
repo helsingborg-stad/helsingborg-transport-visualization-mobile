@@ -1,7 +1,7 @@
 // Auth
 export type LoginRequest = {
   identifier: string;
-  pincode: string;
+  pinCode: string;
 };
 
 export type LoginResponse = {

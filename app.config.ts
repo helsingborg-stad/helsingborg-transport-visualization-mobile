@@ -7,11 +7,11 @@ const ENV = {
     easProjectID: process.env.EAS_PROJECT_ID,
   },
   staging: {
-    apiUrl: process.env.API_URL_STAGING,
+    apiUrl: process.env.API_URL,
     easProjectID: process.env.EAS_PROJECT_ID,
   },
   production: {
-    apiUrl: process.env.API_URL_PRODUCTION,
+    apiUrl: process.env.API_URL,
     easProjectID: process.env.EAS_PROJECT_ID,
   },
 };

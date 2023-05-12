@@ -17,12 +17,10 @@ import {
 } from '@src/components';
 import { PinCodeInput } from '../components/PinCodeInput';
 import { useTheme } from 'styled-components';
-import { useAuthContext } from '@src/context/auth';
-// import { useLogin } from '../hooks/useLogin';
+import { useLogin } from '../hooks/useLogin';
 
 export const LoginScreen: FC = () => {
   const theme = useTheme();
-  const { setUser } = useAuthContext();
 
   const [pin, setPin] = useState('');
   const [isError, setIsError] = useState(false);
@@ -41,10 +39,11 @@ export const LoginScreen: FC = () => {
     'Dummy Organization 5',
   ];
 
-  // const { login, isLoading } = useLogin({
-  //   onSuccess: () => console.log('success'),
-  //   onError: () => console.log('success'),
-  // });
+  const { login } = useLogin({
+    onSuccess: () => console.log('success'),
+    onError: () => isLoginError(),
+    userPin: pin,
+  });
 
   const handlePinFinished = (pin: string) => {
     setIsError(false);
@@ -60,23 +59,15 @@ export const LoginScreen: FC = () => {
 
   const handlePinSubmit = () => {
     setIsError(false);
-    if (pin !== '123456') {
-      setIsError(true);
-      setPin('');
-      //
-    } else {
-      setUser({
-        token: '',
-        isLoggedIn: true,
-        id: '1',
-        orgNumber: '11',
-        pin: '123123',
-        email: '123123',
-        name: '123123',
-        createdAt: '',
-        updatedAt: '',
-      });
-    }
+    login({
+      identifier: 'Bilawal2',
+      pinCode: pin,
+    });
+  };
+
+  const isLoginError = () => {
+    setIsError(true);
+    setPin('');
   };
 
   return (
