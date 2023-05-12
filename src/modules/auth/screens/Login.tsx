@@ -35,6 +35,8 @@ export const LoginScreen: FC = () => {
     userPin: pin,
   });
 
+  console.log(user);
+
   const {
     isLoading: isLoadongOrgs,
     isError: isLoadingOrgsError,
@@ -63,11 +65,11 @@ export const LoginScreen: FC = () => {
     setOrganiazations(tmpList);
 
     //If user object exist get the last organisation
-    if (user) {
-      const orgIndex = tmpList.indexOf(user.name);
-      setCurrentOrgIndex(orgIndex);
-    }
-  }, [organisationsList, user]);
+    // if (user) {
+    //   const orgIndex = tmpList.indexOf(user.name);
+    //   setCurrentOrgIndex(orgIndex);
+    // }
+  }, [organisationsList]);
 
   const handlePinFinished = (pin: string) => {
     setIsError(false);
