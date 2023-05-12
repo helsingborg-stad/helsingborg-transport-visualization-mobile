@@ -4,6 +4,7 @@ import styled from 'styled-components/native';
 import { Body } from '@src/components';
 
 type PinCodeInputProps = {
+  pin?: string;
   isError?: boolean;
   onFinish?: (val: string) => void;
 };
@@ -24,11 +25,19 @@ type StyledPinProps = {
 export const PinCodeInput: React.FC<PinCodeInputProps> = ({
   onFinish,
   isError,
+  pin,
 }) => {
   const inputRef = useRef(null);
   const [inputText, setInputText] = useState('');
   const [currentPinIndex, setCurrentPinIndex] = useState(-1);
   const [showCaret, setShowCaret] = useState(true);
+
+  //On mount check if pin is supplied
+  useEffect(() => {
+    if (pin) {
+      setInputText(pin);
+    }
+  }, [pin]);
 
   //To update the current index for Pin boxes
   useEffect(() => {

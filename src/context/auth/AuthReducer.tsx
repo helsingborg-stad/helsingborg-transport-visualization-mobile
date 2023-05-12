@@ -20,12 +20,6 @@ export const reducer = (state: AuthState, action: Action) => {
         ...state,
         token: null,
         isLoggedIn: action.payload.isLoggedIn,
-        id: '',
-        orgNumber: '',
-        email: '',
-        name: '',
-        createdAt: '',
-        updatedAt: '',
       };
     }
     default: {

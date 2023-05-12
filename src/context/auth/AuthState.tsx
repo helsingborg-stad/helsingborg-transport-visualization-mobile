@@ -93,7 +93,12 @@ export const AuthStore = () => {
     console.log('Logged out');
     try {
       setIsLoading(true);
-      await SecureStore.deleteItemAsync('user');
+      // await SecureStore.deleteItemAsync('user');
+      const userStr = await SecureStore.getItemAsync('user');
+      const userObj = JSON.parse(userStr);
+      const updatedUser = { ...userObj, isLoggedIn: false };
+      await SecureStore.setItemAsync('user', JSON.stringify(updatedUser));
+
       dispatch({ type: ActionType.LOGOUT, payload: { isLoggedIn: false } });
     } catch {
       throw new Error('logout failed');

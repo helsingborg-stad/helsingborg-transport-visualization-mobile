@@ -2,7 +2,7 @@ import React, { FC, useEffect, useState } from 'react';
 import styled from 'styled-components/native';
 import { FontAwesome } from '@expo/vector-icons';
 import WheelPicker from 'react-native-wheely';
-
+import * as SecureStore from 'expo-secure-store';
 import {
   Button,
   Screen,
@@ -19,25 +19,16 @@ import { PinCodeInput } from '../components/PinCodeInput';
 import { useTheme } from 'styled-components';
 import { useLogin, useGetOrganisations } from '../hooks';
 
-type Organisation = {
-  contactPerson: string;
-  createdAt: string;
-  email: string;
-  id: string;
-  mobileNumber: string;
-  name: string;
-  orgNumber: string;
-  updatedAt: string;
-};
-
 export const LoginScreen: FC = () => {
   const theme = useTheme();
 
   const [pin, setPin] = useState('');
+  const [cachedPin, setCachedPin] = useState('');
   const [isError, setIsError] = useState(false);
   const [showOrganizationPopup, setShowOrganizationPopup] = useState(false);
   const [currentOrgIndex, setCurrentOrgIndex] = useState(-1);
-  const [organiazations, setOrganiazations] = useState<Organisation[]>([]);
+  const [organiazations, setOrganiazations] = useState(['']);
+  const [user, setUser] = useState(null);
   const { login } = useLogin({
     onSuccess: () => console.log('success'),
     onError: () => isOrganistionFetchError(),
@@ -53,10 +44,30 @@ export const LoginScreen: FC = () => {
   });
 
   useEffect(() => {
+    const getDataFromStore = async () => {
+      const userStr = await SecureStore.getItemAsync('user');
+
+      const userObj = await JSON.parse(userStr);
+
+      if (userObj) {
+        setCachedPin(userObj.pin);
+        setUser(userObj);
+      }
+    };
+    getDataFromStore();
+  }, []);
+
+  useEffect(() => {
     if (!organisationsList) return;
     const tmpList = organisationsList.map((org) => org.name);
     setOrganiazations(tmpList);
-  }, [organisationsList]);
+
+    //If user object exist get the last organisation
+    if (user) {
+      const orgIndex = tmpList.indexOf(user.name);
+      setCurrentOrgIndex(orgIndex);
+    }
+  }, [organisationsList, user]);
 
   const handlePinFinished = (pin: string) => {
     setIsError(false);
@@ -75,14 +86,10 @@ export const LoginScreen: FC = () => {
   const handlePinSubmit = () => {
     setIsError(false);
 
+    if (currentOrgIndex === -1 || !organisationsList[currentOrgIndex]) return;
+
     //Get the orgNumber
-
     const org = organisationsList[currentOrgIndex];
-
-    console.log('params', {
-      identifier: org.orgNumber,
-      pinCode: pin,
-    });
 
     login({
       identifier: org.orgNumber,
@@ -130,7 +137,11 @@ export const LoginScreen: FC = () => {
           instruktionsmejl/sms
         </StyledSubBody>
         <InputTextContainer>
-          <PinCodeInput isError={isError} onFinish={handlePinFinished} />
+          <PinCodeInput
+            isError={isError}
+            onFinish={handlePinFinished}
+            pin={cachedPin}
+          />
         </InputTextContainer>
 
         {isError && (
