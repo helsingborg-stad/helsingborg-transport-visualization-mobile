@@ -5,8 +5,6 @@ import Slider from '@react-native-community/slider';
 import { useTheme } from 'styled-components';
 import { Platform } from 'react-native';
 import { useAuthContext } from '@src/context/auth';
-import * as SecureStore from 'expo-secure-store';
-import Constants from 'expo-constants';
 
 export const HomeScreen: FC = () => {
   const { logout } = useAuthContext();
@@ -69,10 +67,6 @@ export const HomeScreen: FC = () => {
     return hoursAndMinutes;
   };
 
-  const handleClearStorage = async () => {
-    await SecureStore.deleteItemAsync('user');
-    logout();
-  };
   return (
     <StyledScreen preset="auto" safeAreaEdges={['top', 'bottom']}>
       <Wrapper>
@@ -107,13 +101,6 @@ export const HomeScreen: FC = () => {
             setIsTracking((v) => !v);
           }}
         />
-        <LogoutContainer onPress={handleClearStorage}>
-          <StyledBodyText>Log out (clear Storage)</StyledBodyText>
-        </LogoutContainer>
-
-        <UrlContainer>
-          <StyledBodyText>{Constants.expoConfig.extra?.API_URL}</StyledBodyText>
-        </UrlContainer>
       </Wrapper>
     </StyledScreen>
   );
@@ -185,16 +172,4 @@ const StyleButton = styled(Button)`
 const StyledSlider = styled(Slider)`
   width: 100%;
   height: 40px;
-`;
-
-const LogoutContainer = styled.TouchableOpacity`
-  padding: 10px;
-  position: absolute;
-  top: 10px;
-`;
-
-const UrlContainer = styled.View`
-  padding: 10px;
-  position: absolute;
-  bottom: 0;
 `;

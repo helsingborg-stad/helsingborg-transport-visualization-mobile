@@ -1,8 +1,8 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import styled from 'styled-components/native';
 import { FontAwesome } from '@expo/vector-icons';
 import WheelPicker from 'react-native-wheely';
-import * as SecureStore from 'expo-secure-store';
+// import * as SecureStore from 'expo-secure-store';
 import {
   Button,
   Screen,
@@ -17,59 +17,59 @@ import {
 } from '@src/components';
 import { PinCodeInput } from '../components/PinCodeInput';
 import { useTheme } from 'styled-components';
-import { useLogin, useGetOrganisations } from '../hooks';
+import { useLogin } from '../hooks';
 
 export const LoginScreen: FC = () => {
   const theme = useTheme();
 
   const [pin, setPin] = useState('');
-  const [cachedPin, setCachedPin] = useState('');
+  const [cachedPin] = useState('');
   const [isError, setIsError] = useState(false);
   const [showOrganizationPopup, setShowOrganizationPopup] = useState(false);
   const [currentOrgIndex, setCurrentOrgIndex] = useState(-1);
-  const [organiazations, setOrganiazations] = useState(['']);
-  const [user, setUser] = useState(null);
+  const [organiazations] = useState(['tmp orgs']);
+  // const [user, setUser] = useState(null);
   const { login } = useLogin({
     onSuccess: () => console.log('success'),
     onError: () => isOrganistionFetchError(),
     userPin: pin,
   });
 
-  console.log(user);
+  // console.log(user);
 
-  const {
-    isLoading: isLoadongOrgs,
-    isError: isLoadingOrgsError,
-    organisationsList,
-  } = useGetOrganisations({
-    onError: () => isLoginError(),
-  });
+  // const {
+  //   isLoading: isLoadongOrgs,
+  //   isError: isLoadingOrgsError,
+  //   organisationsList,
+  // } = useGetOrganisations({
+  //   onError: () => isLoginError(),
+  // });
 
-  useEffect(() => {
-    const getDataFromStore = async () => {
-      const userStr = await SecureStore.getItemAsync('user');
+  // useEffect(() => {
+  //   const getDataFromStore = async () => {
+  //     const userStr = await SecureStore.getItemAsync('user');
 
-      const userObj = await JSON.parse(userStr);
+  //     const userObj = await JSON.parse(userStr);
 
-      if (userObj) {
-        setCachedPin(userObj.pin);
-        setUser(userObj);
-      }
-    };
-    getDataFromStore();
-  }, []);
+  //     if (userObj) {
+  //       setCachedPin(userObj.pin);
+  //       setUser(userObj);
+  //     }
+  //   };
+  //   getDataFromStore();
+  // }, []);
 
-  useEffect(() => {
-    if (!organisationsList) return;
-    const tmpList = organisationsList.map((org) => org.name);
-    setOrganiazations(tmpList);
+  // useEffect(() => {
+  //   if (!organisationsList) return;
+  //   const tmpList = organisationsList.map((org) => org.name);
+  //   setOrganiazations(tmpList);
 
-    //If user object exist get the last organisation
-    // if (user) {
-    //   const orgIndex = tmpList.indexOf(user.name);
-    //   setCurrentOrgIndex(orgIndex);
-    // }
-  }, [organisationsList]);
+  //   //If user object exist get the last organisation
+  //   // if (user) {
+  //   //   const orgIndex = tmpList.indexOf(user.name);
+  //   //   setCurrentOrgIndex(orgIndex);
+  //   // }
+  // }, [organisationsList]);
 
   const handlePinFinished = (pin: string) => {
     setIsError(false);
@@ -77,7 +77,7 @@ export const LoginScreen: FC = () => {
   };
 
   const handleOrganizationClick = () => {
-    if (isLoadingOrgsError || isLoadongOrgs) return;
+    // if (isLoadingOrgsError || isLoadongOrgs) return;
 
     setShowOrganizationPopup(true);
     if (currentOrgIndex === -1) {
@@ -88,21 +88,21 @@ export const LoginScreen: FC = () => {
   const handlePinSubmit = () => {
     setIsError(false);
 
-    if (currentOrgIndex === -1 || !organisationsList[currentOrgIndex]) return;
+    // if (currentOrgIndex === -1 || !organisationsList[currentOrgIndex]) return;
 
     //Get the orgNumber
-    const org = organisationsList[currentOrgIndex];
+    // const org = organisationsList[currentOrgIndex];
 
     login({
-      identifier: org.orgNumber,
-      pinCode: pin,
+      identifier: 'bilwalOrg123',
+      pinCode: '123456',
     });
   };
 
-  const isLoginError = () => {
-    setIsError(true);
-    setPin('');
-  };
+  // const isLoginError = () => {
+  //   setIsError(true);
+  //   setPin('');
+  // };
   const isOrganistionFetchError = () => {
     //
     console.log('error while fetching');
@@ -117,17 +117,17 @@ export const LoginScreen: FC = () => {
 
         <StyledOrganizationPressable onPress={handleOrganizationClick}>
           <OrganizationContainer isFocused={showOrganizationPopup}>
-            {isLoadongOrgs && <OrganizationText>Loading</OrganizationText>}
+            {/* {isLoadongOrgs && <OrganizationText>Loading</OrganizationText>}
             {isLoadingOrgsError && (
               <OrganizationText>Error Loading Organisations</OrganizationText>
-            )}
-            {!isLoadongOrgs && !isLoadingOrgsError && (
-              <OrganizationText>
-                {currentOrgIndex === -1
-                  ? 'Välj organisation'
-                  : organiazations[currentOrgIndex]}
-              </OrganizationText>
-            )}
+            )} */}
+            {/* {!isLoadongOrgs && !isLoadingOrgsError && ( */}
+            <OrganizationText>
+              {currentOrgIndex === -1
+                ? 'Välj organisation'
+                : organiazations[currentOrgIndex]}
+            </OrganizationText>
+            {/* )} */}
             <FontAwesome name="angle-down" size={24} color="black" />
           </OrganizationContainer>
         </StyledOrganizationPressable>
