@@ -4,8 +4,10 @@ import { SubTitle, Screen, LargeTitle, Body, Button } from '@src/components';
 import Slider from '@react-native-community/slider';
 import { useTheme } from 'styled-components';
 import { Platform } from 'react-native';
+import { useAuthContext } from '@src/context/auth';
 
 export const HomeScreen: FC = () => {
+  const { logout } = useAuthContext();
   const [isTracking, setIsTracking] = useState(false);
   const [currentStopTrackingTime, setCurrentStopTrackingTime] = useState('');
   const [hoursToTrack, setHoursToTrack] = useState(8);
@@ -94,8 +96,10 @@ export const HomeScreen: FC = () => {
         <StyleButton
           title={isTracking ? 'Starta körning' : 'Stoppa körning'}
           type="primary"
-          onPress={() => setIsTracking((v) => !v)}
-          // onPress={() => logout()}
+          onPress={() => {
+            logout();
+            setIsTracking((v) => !v);
+          }}
         />
       </Wrapper>
     </StyledScreen>

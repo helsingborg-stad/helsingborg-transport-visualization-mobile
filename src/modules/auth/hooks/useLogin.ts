@@ -18,13 +18,23 @@ type Hook = (params: HookParams) => {
 };
 
 export const useLogin: Hook = ({ onSuccess, onError }) => {
-  const { setToken } = useAuthContext();
-  const tmpToken = 'token';
+  const { setUser } = useAuthContext();
+  const user = {
+    token: '',
+    isLoggedIn: true,
+    id: '1',
+    orgNumber: '11',
+    pin: '123123',
+    email: '123123',
+    name: '123123',
+    createdAt: '',
+    updatedAt: '',
+  };
 
   const [isLoading, setIsLoading] = useState(true);
 
   const login = () => {
-    setToken(tmpToken).then(() => {
+    setUser(user).then(() => {
       onSuccess?.();
       onError?.();
     });

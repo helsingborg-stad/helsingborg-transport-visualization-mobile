@@ -7,11 +7,18 @@ import React, {
 } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { reducer } from './AuthReducer';
-import { ActionType, AuthContextProps } from './AuthTypes';
+import { ActionType, AuthContextProps, User } from './AuthTypes';
 
 export const AuthStore = () => {
   const initialState = {
-    token: null,
+    token: '',
+    id: '',
+    orgNumber: '',
+    pin: '',
+    email: '',
+    name: '',
+    createdAt: '',
+    updatedAt: '',
     isLoggedIn: false,
     isLoading: true,
   };
@@ -21,11 +28,22 @@ export const AuthStore = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const getTokenFromStore = async () => {
-    const token = await SecureStore.getItemAsync('token');
-    if (token) {
+    const userStr = await SecureStore.getItemAsync('user');
+    const user: User = JSON.parse(userStr);
+    if (user) {
       dispatch({
         type: ActionType.LOGIN,
-        payload: { token, isLoggedIn: true },
+        payload: {
+          token: user.token,
+          isLoggedIn: user.isLoggedIn,
+          id: user.id,
+          orgNumber: user.orgNumber,
+          pin: user.pin,
+          email: user.email,
+          name: user.name,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
       });
     }
   };
@@ -45,14 +63,24 @@ export const AuthStore = () => {
     getDataFromStore();
   }, []);
 
-  const setToken = async (token: string) => {
-    console.log('token', token);
+  const setUser = async (user: User) => {
+    console.log('token', user);
     try {
       setIsLoading(true);
-      await SecureStore.setItemAsync('token', token);
+      await SecureStore.setItemAsync('user', JSON.stringify(user));
       dispatch({
         type: ActionType.LOGIN,
-        payload: { token, isLoggedIn: true },
+        payload: {
+          token: user.token,
+          isLoggedIn: true,
+          id: user.id,
+          orgNumber: user.orgNumber,
+          pin: user.pin,
+          email: user.email,
+          name: user.name,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
       });
     } catch {
       throw new Error('setUser failed');
@@ -65,7 +93,7 @@ export const AuthStore = () => {
     console.log('Logged out');
     try {
       setIsLoading(true);
-      await SecureStore.deleteItemAsync('token');
+      await SecureStore.deleteItemAsync('user');
       dispatch({ type: ActionType.LOGOUT, payload: { isLoggedIn: false } });
     } catch {
       throw new Error('logout failed');
@@ -75,10 +103,14 @@ export const AuthStore = () => {
   };
 
   return {
-    token: state.token,
+    user: {
+      token: state.token,
+      orgNumber: state.orgNumber,
+      pin: state.pin,
+    },
     isLoggedIn: state.isLoggedIn,
     isLoading,
-    setToken,
+    setUser,
     logout,
   };
 };

@@ -3,15 +3,44 @@ export enum ActionType {
   LOGOUT = 'LOGOUT',
 }
 
+export type User = {
+  token: string | null;
+  id: string;
+  orgNumber: string;
+  email: string;
+  name: string;
+  pin: string;
+  isLoggedIn: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type AuthState = {
   token: string | null;
+  id: string;
+  orgNumber: string;
+  pin: string;
+  email: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
   isLoggedIn: boolean;
   isLoading: boolean;
 };
 
-type SetToken = {
+type SetUser = {
   type: ActionType.LOGIN;
-  payload: { token: string; isLoggedIn: boolean };
+  payload: {
+    token: string | null;
+    id: string;
+    orgNumber: string;
+    pin: string;
+    email: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+    isLoggedIn: boolean;
+  };
 };
 
 type Logout = {
@@ -19,9 +48,9 @@ type Logout = {
   payload: { isLoggedIn: boolean };
 };
 
-export type Action = SetToken | Logout;
+export type Action = SetUser | Logout;
 
-export interface AuthContextProps extends AuthState {
-  setToken: (token: string) => Promise<void>;
+export interface AuthContextProps {
+  setUser: (user: User) => Promise<void>;
   logout: () => void;
 }

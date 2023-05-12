@@ -18,19 +18,16 @@ import {
 import { PinCodeInput } from '../components/PinCodeInput';
 import { useTheme } from 'styled-components';
 import { useAuthContext } from '@src/context/auth';
-// import { useDelegateErrorToRender } from '@src/hooks/useDelegateErrorToRender';
 // import { useLogin } from '../hooks/useLogin';
 
 export const LoginScreen: FC = () => {
   const theme = useTheme();
-  const { setToken } = useAuthContext();
+  const { setUser } = useAuthContext();
 
   const [pin, setPin] = useState('');
   const [isError, setIsError] = useState(false);
   const [showOrganizationPopup, setShowOrganizationPopup] = useState(false);
   const [currentOrgIndex, setCurrentOrgIndex] = useState(-1);
-  // const [errorToThrow, setErrorToThrow] = useState<any>(null);
-  // useDelegateErrorToRender(errorToThrow);
   const organiazation = [
     'Grönsakshallen',
     'Menigo',
@@ -68,11 +65,18 @@ export const LoginScreen: FC = () => {
       setPin('');
       //
     } else {
-      setToken('token');
+      setUser({
+        token: '',
+        isLoggedIn: true,
+        id: '1',
+        orgNumber: '11',
+        pin: '123123',
+        email: '123123',
+        name: '123123',
+        createdAt: '',
+        updatedAt: '',
+      });
     }
-    // setErrorToThrow(
-    //   'Some Error that was thrown and we did not handle, i-e: Background service, user location, network'
-    // );
   };
 
   return (
