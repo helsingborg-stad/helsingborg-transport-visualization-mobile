@@ -7,3 +7,9 @@ export const login = async (request: LoginRequest) => {
   const { data } = await client.post<LoginResponse>(url, request);
   return data;
 };
+
+export const getOrganiztions = async () => {
+  const url = Constants.expoConfig.extra?.API_URL + '/organisations';
+  const { data } = await client.get<LoginResponse>(url);
+  return data;
+};

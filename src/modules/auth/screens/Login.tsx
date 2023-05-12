@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import styled from 'styled-components/native';
 import { FontAwesome } from '@expo/vector-icons';
 import WheelPicker from 'react-native-wheely';
@@ -17,7 +17,18 @@ import {
 } from '@src/components';
 import { PinCodeInput } from '../components/PinCodeInput';
 import { useTheme } from 'styled-components';
-import { useLogin } from '../hooks/useLogin';
+import { useLogin, useGetOrganisations } from '../hooks';
+
+type Organisation = {
+  contactPerson: string;
+  createdAt: string;
+  email: string;
+  id: string;
+  mobileNumber: string;
+  name: string;
+  orgNumber: string;
+  updatedAt: string;
+};
 
 export const LoginScreen: FC = () => {
   const theme = useTheme();
@@ -26,24 +37,26 @@ export const LoginScreen: FC = () => {
   const [isError, setIsError] = useState(false);
   const [showOrganizationPopup, setShowOrganizationPopup] = useState(false);
   const [currentOrgIndex, setCurrentOrgIndex] = useState(-1);
-  const organiazation = [
-    'Grönsakshallen',
-    'Menigo',
-    'Skånemejerier',
-    'Tonys budbil',
-    'Uber',
-    'Dummy Organization 1',
-    'Dummy Organization 2',
-    'Dummy Organization 3',
-    'Dummy Organization 4',
-    'Dummy Organization 5',
-  ];
-
+  const [organiazations, setOrganiazations] = useState<Organisation[]>([]);
   const { login } = useLogin({
     onSuccess: () => console.log('success'),
-    onError: () => isLoginError(),
+    onError: () => isOrganistionFetchError(),
     userPin: pin,
   });
+
+  const {
+    isLoading: isLoadongOrgs,
+    isError: isLoadingOrgsError,
+    organisationsList,
+  } = useGetOrganisations({
+    onError: () => isLoginError(),
+  });
+
+  useEffect(() => {
+    if (!organisationsList) return;
+    const tmpList = organisationsList.map((org) => org.name);
+    setOrganiazations(tmpList);
+  }, [organisationsList]);
 
   const handlePinFinished = (pin: string) => {
     setIsError(false);
@@ -51,6 +64,8 @@ export const LoginScreen: FC = () => {
   };
 
   const handleOrganizationClick = () => {
+    if (isLoadingOrgsError || isLoadongOrgs) return;
+
     setShowOrganizationPopup(true);
     if (currentOrgIndex === -1) {
       setCurrentOrgIndex(0);
@@ -59,8 +74,18 @@ export const LoginScreen: FC = () => {
 
   const handlePinSubmit = () => {
     setIsError(false);
+
+    //Get the orgNumber
+
+    const org = organisationsList[currentOrgIndex];
+
+    console.log('params', {
+      identifier: org.orgNumber,
+      pinCode: pin,
+    });
+
     login({
-      identifier: 'Bilawal2',
+      identifier: org.orgNumber,
       pinCode: pin,
     });
   };
@@ -68,6 +93,10 @@ export const LoginScreen: FC = () => {
   const isLoginError = () => {
     setIsError(true);
     setPin('');
+  };
+  const isOrganistionFetchError = () => {
+    //
+    console.log('error while fetching');
   };
 
   return (
@@ -79,11 +108,17 @@ export const LoginScreen: FC = () => {
 
         <StyledOrganizationPressable onPress={handleOrganizationClick}>
           <OrganizationContainer isFocused={showOrganizationPopup}>
-            <OrganizationText>
-              {currentOrgIndex === -1
-                ? 'Välj organisation'
-                : organiazation[currentOrgIndex]}
-            </OrganizationText>
+            {isLoadongOrgs && <OrganizationText>Loading</OrganizationText>}
+            {isLoadingOrgsError && (
+              <OrganizationText>Error Loading Organisations</OrganizationText>
+            )}
+            {!isLoadongOrgs && !isLoadingOrgsError && (
+              <OrganizationText>
+                {currentOrgIndex === -1
+                  ? 'Välj organisation'
+                  : organiazations[currentOrgIndex]}
+              </OrganizationText>
+            )}
             <FontAwesome name="angle-down" size={24} color="black" />
           </OrganizationContainer>
         </StyledOrganizationPressable>
@@ -117,7 +152,7 @@ export const LoginScreen: FC = () => {
         <StyledModalChildContainer>
           <WheelPicker
             selectedIndex={currentOrgIndex}
-            options={organiazation}
+            options={organiazations}
             onChange={(index) => setCurrentOrgIndex(index)}
             visibleRest={2}
             itemHeight={45}
