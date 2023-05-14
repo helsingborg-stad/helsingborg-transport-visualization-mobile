@@ -1,8 +1,8 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import styled from 'styled-components/native';
 import { FontAwesome } from '@expo/vector-icons';
 import WheelPicker from 'react-native-wheely';
-// import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from 'expo-secure-store';
 import {
   Button,
   Screen,
@@ -17,59 +17,69 @@ import {
 } from '@src/components';
 import { PinCodeInput } from '../components/PinCodeInput';
 import { useTheme } from 'styled-components';
-import { useLogin } from '../hooks';
+import { getOrganiztions, login } from '@src/api/auth';
+import { OrganisationResponse, LoginResponse } from '@src/api/types';
+import { useAuthContext } from '@src/context/auth/AuthState';
+
+import { User } from '@src/context/auth/AuthTypes';
 
 export const LoginScreen: FC = () => {
   const theme = useTheme();
 
   const [pin, setPin] = useState('');
-  const [cachedPin] = useState('');
+  const [cachedPin, setCachedPin] = useState('');
   const [isError, setIsError] = useState(false);
+  const [isOrgNotSelected, setIsOrgNotSelected] = useState(false);
   const [showOrganizationPopup, setShowOrganizationPopup] = useState(false);
   const [currentOrgIndex, setCurrentOrgIndex] = useState(-1);
-  const [organiazations] = useState(['tmp orgs']);
-  // const [user, setUser] = useState(null);
-  const { login } = useLogin({
-    onSuccess: () => console.log('success'),
-    onError: () => isOrganistionFetchError(),
-    userPin: pin,
-  });
+  const [organiazations, setOrganiazations] = useState([]);
+  const [organisationObject, setOrganisationObject] = useState({});
+  const [isLoadingOrgs, setIsLoadingOrgs] = useState(true);
+  const [storedUser, setStoredUser] = useState<User | null>();
+  const { setUser } = useAuthContext();
 
-  // console.log(user);
+  //Fetch organisations on Load
+  useEffect(() => {
+    getOrganiztions()
+      .then((data: OrganisationResponse[]) => {
+        const tmpList = data.map((org) => org.name);
+        setOrganiazations(tmpList);
+        setOrganisationObject(data);
+        setIsLoadingOrgs(false);
+      })
+      .catch((error) => {
+        console.log('org fetch error', error);
+        setIsLoadingOrgs(false);
+      });
+  }, []);
 
-  // const {
-  //   isLoading: isLoadongOrgs,
-  //   isError: isLoadingOrgsError,
-  //   organisationsList,
-  // } = useGetOrganisations({
-  //   onError: () => isLoginError(),
-  // });
+  //Check if the user is in Secure Storage then Populate the pin
+  useEffect(() => {
+    const getDataFromStore = async () => {
+      const userStr = await SecureStore.getItemAsync('user');
 
-  // useEffect(() => {
-  //   const getDataFromStore = async () => {
-  //     const userStr = await SecureStore.getItemAsync('user');
+      const userObj = await JSON.parse(userStr);
 
-  //     const userObj = await JSON.parse(userStr);
+      if (userObj) {
+        setCachedPin(userObj.pin);
+        setStoredUser(userObj);
+      }
+    };
+    getDataFromStore();
+  }, []);
 
-  //     if (userObj) {
-  //       setCachedPin(userObj.pin);
-  //       setUser(userObj);
-  //     }
-  //   };
-  //   getDataFromStore();
-  // }, []);
+  //Check if Organisations are fetched then set the user current Organistaion
+  useEffect(() => {
+    if (!storedUser) return;
+    const orgIndex = organiazations.indexOf(storedUser.name);
+    if (orgIndex !== -1) {
+      setCurrentOrgIndex(orgIndex);
+    }
+  }, [organiazations, storedUser]);
 
-  // useEffect(() => {
-  //   if (!organisationsList) return;
-  //   const tmpList = organisationsList.map((org) => org.name);
-  //   setOrganiazations(tmpList);
-
-  //   //If user object exist get the last organisation
-  //   // if (user) {
-  //   //   const orgIndex = tmpList.indexOf(user.name);
-  //   //   setCurrentOrgIndex(orgIndex);
-  //   // }
-  // }, [organisationsList]);
+  //
+  // Handler funcs
+  //
 
   const handlePinFinished = (pin: string) => {
     setIsError(false);
@@ -77,35 +87,43 @@ export const LoginScreen: FC = () => {
   };
 
   const handleOrganizationClick = () => {
-    // if (isLoadingOrgsError || isLoadongOrgs) return;
-
+    if (!isLoadingOrgs && organiazations.length < 0) return;
     setShowOrganizationPopup(true);
     if (currentOrgIndex === -1) {
       setCurrentOrgIndex(0);
     }
   };
 
-  const handlePinSubmit = () => {
+  const handlePinSubmit = async () => {
     setIsError(false);
+    setIsOrgNotSelected(false);
 
-    // if (currentOrgIndex === -1 || !organisationsList[currentOrgIndex]) return;
+    if (currentOrgIndex === -1) {
+      setIsOrgNotSelected(true);
+      return;
+    }
 
-    //Get the orgNumber
-    // const org = organisationsList[currentOrgIndex];
+    // Get the orgNumber
+    const org = organisationObject[currentOrgIndex];
+    const payload = {
+      identifier: org.orgNumber,
+      pinCode: pin,
+    };
+    console.log('payload', payload);
+    login(payload)
+      .then((data: LoginResponse) => {
+        const extraKeys = { pin: pin, isLoggedIn: true };
+        const userObj = { ...data, ...extraKeys };
 
-    login({
-      identifier: 'bilwalOrg123',
-      pinCode: '123456',
-    });
-  };
-
-  // const isLoginError = () => {
-  //   setIsError(true);
-  //   setPin('');
-  // };
-  const isOrganistionFetchError = () => {
-    //
-    console.log('error while fetching');
+        setUser(userObj).then(() => {
+          console.log('user stored in SecureStorage');
+        });
+      })
+      .catch((err) => {
+        console.log('err', err);
+        setIsError(true);
+        setPin('');
+      });
   };
 
   return (
@@ -116,18 +134,21 @@ export const LoginScreen: FC = () => {
         <StyledSubTitle>Organisation du kör för</StyledSubTitle>
 
         <StyledOrganizationPressable onPress={handleOrganizationClick}>
-          <OrganizationContainer isFocused={showOrganizationPopup}>
-            {/* {isLoadongOrgs && <OrganizationText>Loading</OrganizationText>}
-            {isLoadingOrgsError && (
+          <OrganizationContainer
+            isFocused={showOrganizationPopup}
+            isOrgError={isOrgNotSelected}
+          >
+            {isLoadingOrgs && <OrganizationText>Loading</OrganizationText>}
+            {!isLoadingOrgs && organiazations.length < 0 && (
               <OrganizationText>Error Loading Organisations</OrganizationText>
-            )} */}
-            {/* {!isLoadongOrgs && !isLoadingOrgsError && ( */}
-            <OrganizationText>
-              {currentOrgIndex === -1
-                ? 'Välj organisation'
-                : organiazations[currentOrgIndex]}
-            </OrganizationText>
-            {/* )} */}
+            )}
+            {!isLoadingOrgs && organiazations.length > 0 && (
+              <OrganizationText>
+                {currentOrgIndex === -1
+                  ? 'Välj organisation'
+                  : organiazations[currentOrgIndex]}
+              </OrganizationText>
+            )}
             <FontAwesome name="angle-down" size={24} color="black" />
           </OrganizationContainer>
         </StyledOrganizationPressable>
@@ -166,7 +187,9 @@ export const LoginScreen: FC = () => {
           <WheelPicker
             selectedIndex={currentOrgIndex}
             options={organiazations}
-            onChange={(index) => setCurrentOrgIndex(index)}
+            onChange={(index) => {
+              setCurrentOrgIndex(index);
+            }}
             visibleRest={2}
             itemHeight={45}
             itemTextStyle={{
@@ -193,6 +216,7 @@ const StyledModal = styled(Modal)``;
 
 type OrganizationContainerProps = {
   isFocused?: boolean;
+  isOrgError?: boolean;
 };
 
 const Wrapper = styled.View`
@@ -218,8 +242,12 @@ const OrganizationContainer = styled.View<OrganizationContainerProps>`
   padding: ${({ theme }) => theme.space.md};
   border-width: 1px;
   border-radius: ${({ theme }) => theme.radius.lg};
-  border-color: ${({ theme, isFocused }) =>
-    isFocused ? theme.colors.primary.main : 'transparent'};
+  border-color: ${({ theme, isFocused, isOrgError }) =>
+    isOrgError
+      ? theme.colors.state.error
+      : isFocused
+      ? theme.colors.primary.main
+      : 'transparent'};
   margin-bottom: ${({ theme }) => theme.space.xl};
 `;
 

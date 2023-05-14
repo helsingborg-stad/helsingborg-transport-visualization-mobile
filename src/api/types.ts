@@ -13,3 +13,14 @@ export type LoginResponse = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type OrganisationResponse = {
+  contactPerson: string;
+  createdAt: string;
+  email: string;
+  id: string;
+  mobileNumber: string;
+  name: string;
+  orgNumber: string;
+  updatedAt: string;
+};
