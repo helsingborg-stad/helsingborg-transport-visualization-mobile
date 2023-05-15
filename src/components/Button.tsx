@@ -1,5 +1,6 @@
 import React from 'react';
 import { TouchableOpacityProps } from 'react-native';
+import { ActivityIndicator } from './ActivityIndicator';
 import { ButtonText, OutlinedButtonText } from './Text';
 import styled from 'styled-components/native';
 
@@ -13,6 +14,7 @@ type StyledButtonProps = {
 interface ButtonProps extends TouchableOpacityProps {
   title: string;
   type?: Type;
+  isLoading?: boolean;
   onPress: () => void;
 }
 
@@ -20,23 +22,27 @@ export const Button = ({
   title,
   type = 'primary',
   onPress,
+  isLoading,
   ...rest
 }: ButtonProps) => {
   switch (type) {
     case 'primary':
       return (
-        <StyledButtonPrimary onPress={onPress} {...rest}>
+        <StyledButtonPrimary onPress={onPress} isLoading={isLoading} {...rest}>
+          {isLoading && <ActivityIndicator />}
           <StyledText>{title}</StyledText>
         </StyledButtonPrimary>
       );
     case 'outline':
       return (
-        <StyledButtonOutlined onPress={onPress} {...rest}>
+        <StyledButtonOutlined onPress={onPress} isLoading={isLoading} {...rest}>
+          {isLoading && <ActivityIndicator />}
           <StyledTextOutlined>{title}</StyledTextOutlined>
         </StyledButtonOutlined>
       );
     default:
-      <StyledButtonPrimary onPress={onPress} {...rest}>
+      <StyledButtonPrimary onPress={onPress} isLoading={isLoading} {...rest}>
+        {isLoading && <ActivityIndicator />}
         <StyledText>{title}</StyledText>
       </StyledButtonPrimary>;
       break;
@@ -45,15 +51,17 @@ export const Button = ({
 
 Button.defaultProps = {
   type: 'primary',
+  isLoading: false,
 };
 
 const StyledButton = styled.TouchableOpacity<StyledButtonProps>`
   border-radius: ${({ theme }) => theme.radius.md};
-  opacity: ${({ disabled, isLoading }) => (disabled && !isLoading ? 0.5 : 1)};
+  opacity: ${({ disabled, isLoading }) => (disabled || isLoading ? 0.5 : 1)};
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 14px 28px;
+  padding: ${({ theme }) => `${theme.space.md} ${theme.space.xl}`};
+  gap: ${({ theme }) => theme.space.sm};
 `;
 
 const StyledButtonPrimary = styled(StyledButton)`

@@ -14,6 +14,7 @@ import {
   Modal,
   ModalChildContainer,
   ModalBackDrop,
+  ActivityIndicator,
 } from '@src/components';
 import { PinCodeInput } from '../components/PinCodeInput';
 import { useTheme } from 'styled-components';
@@ -25,18 +26,23 @@ import { User } from '@src/context/auth/AuthTypes';
 
 export const LoginScreen: FC = () => {
   const theme = useTheme();
+  const { setUser } = useAuthContext();
 
+  //Button States
+  const [isLoggingIn, setisLoggingIn] = useState(false);
+  //Pin code states
   const [pin, setPin] = useState('');
   const [cachedPin, setCachedPin] = useState('');
-  const [isError, setIsError] = useState(false);
+  const [isPinError, setIsPinError] = useState(false);
+  //Org states
   const [isOrgNotSelected, setIsOrgNotSelected] = useState(false);
   const [showOrganizationPopup, setShowOrganizationPopup] = useState(false);
   const [currentOrgIndex, setCurrentOrgIndex] = useState(-1);
   const [organiazations, setOrganiazations] = useState([]);
   const [organisationObject, setOrganisationObject] = useState({});
   const [isLoadingOrgs, setIsLoadingOrgs] = useState(true);
+  //Context - SecureStorage user state
   const [storedUser, setStoredUser] = useState<User | null>();
-  const { setUser } = useAuthContext();
 
   //Fetch organisations on Load
   useEffect(() => {
@@ -82,7 +88,7 @@ export const LoginScreen: FC = () => {
   //
 
   const handlePinFinished = (pin: string) => {
-    setIsError(false);
+    setIsPinError(false);
     setPin(pin);
   };
 
@@ -95,8 +101,9 @@ export const LoginScreen: FC = () => {
   };
 
   const handlePinSubmit = async () => {
-    setIsError(false);
+    setIsPinError(false);
     setIsOrgNotSelected(false);
+    setisLoggingIn(true);
 
     if (currentOrgIndex === -1) {
       setIsOrgNotSelected(true);
@@ -118,11 +125,14 @@ export const LoginScreen: FC = () => {
         setUser(userObj).then(() => {
           console.log('user stored in SecureStorage');
         });
+
+        setisLoggingIn(false);
       })
       .catch((err) => {
         console.log('err', err);
-        setIsError(true);
+        setIsPinError(true);
         setPin('');
+        setisLoggingIn(false);
       });
   };
 
@@ -138,6 +148,7 @@ export const LoginScreen: FC = () => {
             isFocused={showOrganizationPopup}
             isOrgError={isOrgNotSelected}
           >
+            {isLoadingOrgs && <ActivityIndicator />}
             {isLoadingOrgs && <OrganizationText>Loading</OrganizationText>}
             {!isLoadingOrgs && organiazations.length < 0 && (
               <OrganizationText>Error Loading Organisations</OrganizationText>
@@ -161,13 +172,13 @@ export const LoginScreen: FC = () => {
         </StyledSubBody>
         <InputTextContainer>
           <PinCodeInput
-            isError={isError}
+            isError={isPinError}
             onFinish={handlePinFinished}
             pin={cachedPin}
           />
         </InputTextContainer>
 
-        {isError && (
+        {isPinError && (
           <StyledErrorText>
             Fel pinkod - kolla att du valt rätt organisation och testa igen.
           </StyledErrorText>
@@ -177,6 +188,8 @@ export const LoginScreen: FC = () => {
             title={'Starta körning'}
             onPress={handlePinSubmit}
             type="primary"
+            disabled={isLoggingIn}
+            isLoading={isLoggingIn}
           />
         )}
       </Wrapper>
@@ -239,6 +252,7 @@ const OrganizationContainer = styled.View<OrganizationContainerProps>`
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  gap: ${({ theme }) => theme.space.md};
   padding: ${({ theme }) => theme.space.md};
   border-width: 1px;
   border-radius: ${({ theme }) => theme.radius.lg};
