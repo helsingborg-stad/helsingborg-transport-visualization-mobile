@@ -5,71 +5,27 @@ import Slider from '@react-native-community/slider';
 import { useTheme } from 'styled-components';
 import { Platform } from 'react-native';
 import { useAuthContext } from '@src/context/auth';
+import { useGetTrackingTimeText } from '../hooks/useGetTrackingTimeText';
+import { useGetAllZones } from '@src/modules/zone/hooks/useGetAllZones';
 
 export const HomeScreen: FC = () => {
   const { logout } = useAuthContext();
-  const [isTracking, setIsTracking] = useState(false);
-  const [currentStopTrackingTime, setCurrentStopTrackingTime] = useState('');
-  const [hoursToTrack, setHoursToTrack] = useState(8);
-  const [timeLeft, setTimeLeft] = useState('');
-  const [endTime, setEndTime] = useState(null);
   const theme = useTheme();
+  //State
+  const [hoursToTrack, setHoursToTrack] = useState(8);
+  const [isTracking, setIsTracking] = useState(false);
+
+  //Hooks
+  const { currentStopTrackingTime, timeLeft } =
+    useGetTrackingTimeText(hoursToTrack);
+
+  //Get All getAllZones
+  const { zones } = useGetAllZones();
 
   useEffect(() => {
-    const StopTimeForamated = calculateHoursToStopTracking(hoursToTrack);
-    setCurrentStopTrackingTime(StopTimeForamated);
-  }, [hoursToTrack]);
-
-  //Get Time Remaining
-  useEffect(() => {
-    if (!endTime) return;
-    const today = new Date();
-    const timeLeft = getTimeDifference(today, endTime);
-    setTimeLeft(timeLeft);
-  }, [endTime]);
-
-  //Set an interval to auto calculate the time remaning
-  useEffect(() => {
-    if (!endTime) return;
-    const interval = setInterval(() => {
-      const today = new Date();
-      const timeLeft = getTimeDifference(today, endTime);
-      setTimeLeft(timeLeft);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [endTime]);
-
-  const calculateHoursToStopTracking = (hours: number) => {
-    const hoursToAdd = 1000 * 60 * 60 * hours;
-    const stopTime = new Date(new Date().getTime() + hoursToAdd);
-    let StopTimeForamated = stopTime.toLocaleString([], {
-      hour12: false,
-    });
-    StopTimeForamated = StopTimeForamated.slice(-8).slice(0, -3);
-    setEndTime(stopTime);
-    return StopTimeForamated;
-  };
-
-  const getTimeDifference = (startTime, endTime) => {
-    if (hoursToTrack < 1) return '';
-    const difference = endTime - startTime;
-    const differenceInMinutes = Math.floor(difference / 1000 / 60);
-    let hours = Math.floor(differenceInMinutes / 60);
-    if (hours < 0) {
-      hours = 0;
-    }
-    let minutes = Math.floor(differenceInMinutes % 60);
-    if (minutes < 0) {
-      minutes = 60 + minutes;
-    }
-
-    const seconds = Math.floor((Math.abs(difference) / 1000) % 60);
-
-    const hoursAndMinutes = `om ${hours} tim ${minutes
-      .toString()
-      .padStart(2, '0')} min ${seconds.toString().padStart(2, '0')} sekunder`;
-    return hoursAndMinutes;
-  };
+    //
+    console.log('Zone', zones.features[0].geometry.coordinates);
+  }, [zones]);
 
   return (
     <StyledScreen preset="auto" safeAreaEdges={['top', 'bottom']}>
