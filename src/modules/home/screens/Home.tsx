@@ -22,6 +22,7 @@ export const HomeScreen: FC = () => {
 
   //Get Time Remaining
   useEffect(() => {
+    if (!endTime) return;
     const today = new Date();
     const timeLeft = getTimeDifference(today, endTime);
     setTimeLeft(timeLeft);
@@ -29,41 +30,44 @@ export const HomeScreen: FC = () => {
 
   //Set an interval to auto calculate the time remaning
   useEffect(() => {
+    if (!endTime) return;
     const interval = setInterval(() => {
       const today = new Date();
       const timeLeft = getTimeDifference(today, endTime);
       setTimeLeft(timeLeft);
-    }, 1000 * 60);
+    }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [endTime]);
 
   const calculateHoursToStopTracking = (hours: number) => {
     const hoursToAdd = 1000 * 60 * 60 * hours;
-    const today = new Date();
-    const stopTime = new Date(today.getTime() + hoursToAdd);
-
+    const stopTime = new Date(new Date().getTime() + hoursToAdd);
     let StopTimeForamated = stopTime.toLocaleString([], {
       hour12: false,
     });
-    StopTimeForamated = StopTimeForamated.slice(12).slice(0, -3);
+    StopTimeForamated = StopTimeForamated.slice(-8).slice(0, -3);
     setEndTime(stopTime);
     return StopTimeForamated;
   };
 
   const getTimeDifference = (startTime, endTime) => {
+    if (hoursToTrack < 1) return '';
     const difference = endTime - startTime;
-    const differenceInMinutes = difference / 1000 / 60;
+    const differenceInMinutes = Math.floor(difference / 1000 / 60);
     let hours = Math.floor(differenceInMinutes / 60);
     if (hours < 0) {
-      hours = 24 + hours;
+      hours = 0;
     }
     let minutes = Math.floor(differenceInMinutes % 60);
     if (minutes < 0) {
       minutes = 60 + minutes;
     }
-    const hoursAndMinutes = `om ${hours} tim ${
-      (minutes < 10 ? '0' : '') + minutes
-    } min`;
+
+    const seconds = Math.floor((Math.abs(difference) / 1000) % 60);
+
+    const hoursAndMinutes = `om ${hours} tim ${minutes
+      .toString()
+      .padStart(2, '0')} min ${seconds.toString().padStart(2, '0')} sekunder`;
     return hoursAndMinutes;
   };
 
@@ -78,9 +82,9 @@ export const HomeScreen: FC = () => {
         <SliderContainer>
           <StyledSlider
             // style={{ width: '100%', height: 40 }}
-            minimumValue={0}
+            minimumValue={1}
             maximumValue={12}
-            value={8}
+            value={hoursToTrack}
             thumbTintColor={theme.colors.primary.main}
             minimumTrackTintColor={theme.colors.primary.main}
             maximumTrackTintColor={theme.colors.primary.backgroundHighlight}
@@ -88,7 +92,7 @@ export const HomeScreen: FC = () => {
             step={1}
           />
           <SliderMinMaxContiner>
-            <StyledRangeText>0 h</StyledRangeText>
+            <StyledRangeText>1 h</StyledRangeText>
             <Filler />
             <StyledRangeText>12 h</StyledRangeText>
           </SliderMinMaxContiner>
