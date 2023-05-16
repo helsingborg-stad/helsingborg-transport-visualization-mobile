@@ -14,7 +14,7 @@ export const getAllZones = () => {
       headers: {
         Accept: 'application/json, text/plain, */*',
         'Content-Type': 'application/json',
-        Authentication: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     })
       .then((res) => {
@@ -46,7 +46,7 @@ export const postEvent = (id, request) => {
       headers: {
         Accept: 'application/json, text/plain, */*',
         'Content-Type': 'application/json',
-        Authentication: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(request),
     })
