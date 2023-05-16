@@ -4,6 +4,7 @@ export enum ActionType {
 }
 
 export type User = {
+  trackingId: string;
   token: string | null;
   id: string;
   orgNumber: string;
@@ -16,6 +17,7 @@ export type User = {
 };
 
 export type AuthState = {
+  trackingId: string;
   token: string | null;
   id: string;
   orgNumber: string;
@@ -31,6 +33,7 @@ export type AuthState = {
 type SetUser = {
   type: ActionType.LOGIN;
   payload: {
+    trackingId: string;
     token: string | null;
     id: string;
     orgNumber: string;

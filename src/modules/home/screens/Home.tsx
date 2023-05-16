@@ -4,6 +4,7 @@ import { SubTitle, Screen, LargeTitle, Body, Button } from '@src/components';
 import Slider from '@react-native-community/slider';
 import { useTheme } from 'styled-components';
 import { Platform } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
 import { useAuthContext } from '@src/context/auth';
 import { useGetTrackingTimeText } from '../hooks/useGetTrackingTimeText';
 import { useGetAllZones } from '@src/modules/zone/hooks/useGetAllZones';
@@ -13,6 +14,7 @@ import {
   stopForegroundUpdate,
 } from '../services/ForgroundLocationService';
 import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Contants';
+import { User } from '@src/context/auth/AuthTypes';
 
 export const HomeScreen: FC = () => {
   const { logout } = useAuthContext();
@@ -46,7 +48,7 @@ export const HomeScreen: FC = () => {
     }
   };
 
-  const taskToRun = (location) => {
+  const taskToRun = async (location) => {
     // if zones or location is not available then we cannot do anything
     // just return
     if (!zones || !location) {
@@ -71,24 +73,103 @@ export const HomeScreen: FC = () => {
     setTimeout(() => {
       setIsServiceCalled(false);
     }, 3000);
-    //END REMOVE
 
     setLocation(location);
+    //END REMOVE
+
+    //Check the local storage and see if there are any zones
+    const zonesToSendStr = await SecureStore.getItemAsync('zonesToSend');
+    const zonesToSend = JSON.parse(zonesToSendStr);
+
+    if (zonesToSend) {
+      //if yes -> check if user has exited the zone
+      // if No -> do nothing
+      //if yes -> make an api call to log the event and
+      //remove the zone from local storage
+      //Do above for all getAllZones
+
+      //Get Tracking ID
+      //check if we already have a tracking id in secure store
+      let trackingId = '';
+      const userStr = await SecureStore.getItemAsync('user');
+      const user: User = JSON.parse(userStr);
+
+      if (user) {
+        trackingId = user.trackingId;
+      }
+
+      let distributionZoneId = null;
+
+      zonesToSend.forEach(async (zone) => {
+        const poly = zone;
+        const isInsideZone = turf.booleanPointInPolygon(pt, poly);
+
+        if (!isInsideZone) {
+          if (
+            zone.properties.type &&
+            zone.properties.type.toLowerCase() === 'distribution'
+          ) {
+            distributionZoneId = zone.properties.id;
+            SecureStore.setItemAsync(
+              'distributionId',
+              JSON.stringify(zone.properties.id)
+            );
+          } else {
+            //Check if type is distibution is in Local storage
+            const distributionId = await SecureStore.getItemAsync(
+              'distributionId'
+            );
+
+            if (distributionId) {
+              distributionZoneId = distributionId;
+            }
+          }
+
+          const foramttedZone = {
+            trackingId: trackingId,
+            distributionZoneId: distributionZoneId,
+            enteredAt: Date.now(),
+            exitedAt: null,
+          };
+          const eventID = zone.properties.id;
+          //Call the API
+
+          console.log('Zone to send', foramttedZone, eventID);
+        }
+      });
+    }
+
+    //After its done -> just move on as normal flow
 
     const pt = turf.point([12.730018737, 56.025278798]);
     // const pt = turf.point([location.latitude, location.longitude]);
     const features = zones.features;
     let userZones = [];
-    features.forEach((zone) => {
+    features.forEach(async (zone) => {
       const poly = zone;
       const isInsideZone = turf.booleanPointInPolygon(pt, poly);
       if (isInsideZone) {
-        userZones = [...userZones, zone.properties.name];
+        userZones = [...userZones, zone];
       }
     });
-    console.log('User is in this zone');
 
+    //If zones in local storage does not exist create a new one
+    if (zonesToSend) {
+      const updatedZones = [...zonesToSend, ...userZones];
+      await SecureStore.setItemAsync(
+        'zonesToSend',
+        JSON.stringify(updatedZones)
+      );
+    } else {
+      await SecureStore.setItemAsync('zonesToSend', JSON.stringify(userZones));
+    }
+
+    //ElseAppend the new zones to the local storage for uploaded next time
+
+    //Dev only - Remove after Petter test the app
     setUserZones(userZones);
+    //END REMOVE
+    console.log('User is in this zone', userZones);
   };
 
   return (

@@ -11,6 +11,7 @@ import { ActionType, AuthContextProps, User } from './AuthTypes';
 
 export const AuthStore = () => {
   const initialState = {
+    trackingId: '',
     token: '',
     id: '',
     orgNumber: '',
@@ -34,6 +35,7 @@ export const AuthStore = () => {
       dispatch({
         type: ActionType.LOGIN,
         payload: {
+          trackingId: user.trackingId,
           token: user.token,
           isLoggedIn: user.isLoggedIn,
           id: user.id,
@@ -64,13 +66,13 @@ export const AuthStore = () => {
   }, []);
 
   const setUser = async (user: User) => {
-    console.log('token', user);
     try {
       setIsLoading(true);
       await SecureStore.setItemAsync('user', JSON.stringify(user));
       dispatch({
         type: ActionType.LOGIN,
         payload: {
+          trackingId: '',
           token: user.token,
           isLoggedIn: true,
           id: user.id,

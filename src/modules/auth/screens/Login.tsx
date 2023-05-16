@@ -3,6 +3,8 @@ import styled from 'styled-components/native';
 import { FontAwesome } from '@expo/vector-icons';
 import WheelPicker from 'react-native-wheely';
 import * as SecureStore from 'expo-secure-store';
+import uuid from 'react-native-uuid';
+
 import {
   Button,
   Screen,
@@ -41,7 +43,6 @@ export const LoginScreen: FC = () => {
   const [organiazations, setOrganiazations] = useState([]);
   const [organisationObject, setOrganisationObject] = useState({});
   const [isLoadingOrgs, setIsLoadingOrgs] = useState(true);
-  //Context - SecureStorage user state
   const [storedUser, setStoredUser] = useState<User | null>();
 
   //Fetch organisations on Load
@@ -116,10 +117,25 @@ export const LoginScreen: FC = () => {
       identifier: org.orgNumber,
       pinCode: pin,
     };
-    console.log('payload', payload);
     login(payload)
-      .then((data: LoginResponse) => {
-        const extraKeys = { pin: pin, isLoggedIn: true };
+      .then(async (data: LoginResponse) => {
+        let trackingId = null;
+        //check if we already have a tracking id in secure store
+        const userStr = await SecureStore.getItemAsync('user');
+        const user: User = JSON.parse(userStr);
+
+        if (user && user.trackingId) {
+          trackingId = user.trackingId;
+        } else {
+          //generate a new tracking id
+          trackingId = uuid.v4();
+        }
+        const extraKeys = {
+          pin: pin,
+          isLoggedIn: true,
+          trackingId: trackingId,
+        };
+
         const userObj = { ...data, ...extraKeys };
 
         setUser(userObj).then(() => {
