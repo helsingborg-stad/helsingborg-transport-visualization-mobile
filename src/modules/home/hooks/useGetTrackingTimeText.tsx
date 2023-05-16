@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 
-export function useGetTrackingTimeText(hoursToTrack: number) {
+export function useGetTrackingTimeText(
+  hoursToTrack: number,
+  startTimer: boolean
+) {
   const [currentStopTrackingTime, setCurrentStopTrackingTime] = useState('');
   const [timeLeft, setTimeLeft] = useState('');
   const [endTime, setEndTime] = useState(null);
@@ -20,14 +23,14 @@ export function useGetTrackingTimeText(hoursToTrack: number) {
 
   //Set an interval to auto calculate the time remaning
   useEffect(() => {
-    if (!endTime) return;
+    if (!endTime || !startTimer) return;
     const interval = setInterval(() => {
       const today = new Date();
       const timeLeft = getTimeDifference(today, endTime);
       setTimeLeft(timeLeft);
     }, 1000);
     return () => clearInterval(interval);
-  }, [endTime]);
+  }, [endTime, startTimer]);
 
   const calculateHoursToStopTracking = (hours: number) => {
     const hoursToAdd = 1000 * 60 * 60 * hours;
