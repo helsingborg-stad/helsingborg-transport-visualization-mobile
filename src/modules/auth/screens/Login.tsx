@@ -138,9 +138,7 @@ export const LoginScreen: FC = () => {
 
         const userObj = { ...data, ...extraKeys };
 
-        setUser(userObj).then(() => {
-          console.log('user stored in SecureStorage');
-        });
+        setUser(userObj);
 
         setisLoggingIn(false);
       })

@@ -1,12 +1,10 @@
 import { User } from '@src/context/auth/AuthTypes';
 import * as SecureStore from 'expo-secure-store';
-
-const baseUrl =
-  'https://helsingborg-transport-visualization-backend-3ca3faqvfa-lz.a.run.app';
+import { BASE_URL } from '@src/utils/Contants';
 
 export const getAllZones = () => {
   return new Promise(async (resolve, reject) => {
-    const url = baseUrl + '/zones';
+    const url = BASE_URL + '/zones';
     const token = await getUserToken();
 
     if (!token) reject('token not found');
@@ -21,7 +19,9 @@ export const getAllZones = () => {
     })
       .then((res) => {
         if (!res.ok) {
-          reject(res.status);
+          return res.text().then((text) => {
+            throw new Error(text);
+          });
         }
         return res.json();
       })
@@ -36,10 +36,8 @@ export const getAllZones = () => {
 
 export const postEvent = (id, request) => {
   return new Promise(async (resolve, reject) => {
-    const url = baseUrl + `/zones/${id}/events`;
+    const url = BASE_URL + `/zones/${id}/events`;
     const token = await getUserToken();
-
-    console.log('---->', id, request, url);
 
     if (!token) reject('token not found');
 
@@ -54,7 +52,9 @@ export const postEvent = (id, request) => {
     })
       .then((res) => {
         if (!res.ok) {
-          reject(res.status);
+          return res.text().then((text) => {
+            throw new Error(text);
+          });
         }
         return res.json();
       })

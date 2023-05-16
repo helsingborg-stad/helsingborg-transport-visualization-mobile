@@ -78,7 +78,6 @@ export const PinCodeInput: React.FC<PinCodeInputProps> = ({
 
   // To show the keyboard when PinCode boxes are pressed
   const handleOnPress = () => {
-    console.log('press');
     if (inputRef) {
       // inputRef.current.blur();
       inputRef.current.focus();

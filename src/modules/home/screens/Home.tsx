@@ -1,6 +1,15 @@
 import React, { FC, useRef, useState } from 'react';
 import styled from 'styled-components/native';
-import { SubTitle, Screen, LargeTitle, Body, Button } from '@src/components';
+import {
+  SubTitle,
+  Screen,
+  LargeTitle,
+  Body,
+  Button,
+  Modal,
+  ModalChildContainer,
+  ModalBackDrop,
+} from '@src/components';
 import Slider from '@react-native-community/slider';
 import { useTheme } from 'styled-components';
 import { Platform } from 'react-native';
@@ -18,12 +27,17 @@ import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Contants';
 import { User } from '@src/context/auth/AuthTypes';
 import { postEvent } from '@src/api/zone';
 
+//
+//
+//
 export const HomeScreen: FC = () => {
   const { logout } = useAuthContext();
   const theme = useTheme();
   //State
   const [hoursToTrack, setHoursToTrack] = useState(8);
   const [isTracking, setIsTracking] = useState(false);
+  const [showDevInfoModal, setShowDevInfoModal] = useState(false);
+  const [apiCallStatus, setApiCallStatus] = useState('');
   //Foreground
   const [location, setLocation] = useState(null);
   const [userZones, setUserZones] = useState(null);
@@ -45,9 +59,10 @@ export const HomeScreen: FC = () => {
       stopForegroundUpdate();
       logout();
     } else {
-      // await AsyncStorage.removeItem('zonesToSend');
+      await AsyncStorage.removeItem('zonesToSend');
       setIsTracking(true);
       startForegroundUpdate(taskToRun);
+      setShowDevInfoModal(true);
     }
   };
 
@@ -80,8 +95,8 @@ export const HomeScreen: FC = () => {
     setLocation(location);
     //END REMOVE
 
-    const pt = turf.point([12.730018737, 56.025278798]);
-    // const pt = turf.point([location.latitude, location.longitude]);
+    // const pt = turf.point([12.730018737, 56.025278798]);
+    const pt = turf.point([location.latitude, location.longitude]);
 
     //Check the local storage and see if there are any zones
     let zonesToSend = [];
@@ -105,11 +120,11 @@ export const HomeScreen: FC = () => {
       }
 
       let distributionZoneId = null;
-      const newPt = turf.point([100.730018737, 100.025278798]);
+      // const newPt = turf.point([100.730018737, 100.025278798]);
 
       zonesToSend.forEach(async (zone) => {
         const poly = zone;
-        const isInsideZone = turf.booleanPointInPolygon(newPt, poly);
+        const isInsideZone = turf.booleanPointInPolygon(pt, poly);
 
         if (!isInsideZone) {
           if (
@@ -134,17 +149,27 @@ export const HomeScreen: FC = () => {
             trackingId: trackingId,
             distributionZoneId: distributionZoneId,
             enteredAt: zone.properties.enteredAtTime,
-            exitedAt: Date.now().toString(),
+            exitedAt: new Date().toLocaleString('sv-SE', {
+              timeZone: 'UTC',
+              hour12: false,
+            }),
           };
           const eventID = zone.properties.id;
           //Call the API
+          setApiCallStatus('Attempting to store event');
           postEvent(eventID, foramttedZone)
-            .then((res) => {
-              console.log('==========>res', res);
+            .then(() => {
+              setApiCallStatus('Event stored successfully');
             })
             .catch((err) => {
-              console.log('==========>err', err);
+              setApiCallStatus(
+                'Could Not store Event, API call Failed -> ' + err
+              );
             });
+
+          setTimeout(() => {
+            setApiCallStatus('');
+          }, 5000);
         }
       });
     }
@@ -156,7 +181,10 @@ export const HomeScreen: FC = () => {
       const poly = zone;
       const isInsideZone = turf.booleanPointInPolygon(pt, poly);
       if (isInsideZone) {
-        zone.properties.enteredAtTime = Date.now().toString();
+        zone.properties.enteredAtTime = new Date().toLocaleString('sv-SE', {
+          timeZone: 'UTC',
+          hour12: false,
+        });
         userZones = [...userZones, zone];
       }
     });
@@ -233,26 +261,39 @@ export const HomeScreen: FC = () => {
             toggleForegroundService();
           }}
         />
-        {/* Dev only - Remove after Petter test the app */}
-        <StyledSericeText>
-          {isServiceCalled ? 'Service Called' : '-'}
-        </StyledSericeText>
-
-        <StyledUserLocationContainer>
-          <StyledHeader>Location:</StyledHeader>
-          {location && (
-            <StyledBody>
-              {location.latitude}, {location.longitude}
-            </StyledBody>
-          )}
-        </StyledUserLocationContainer>
-
-        <StyledUserZonesContainer>
-          <StyledHeader>Zones:</StyledHeader>
-          {userZones && <StyledBody>{JSON.stringify(userZones)}</StyledBody>}
-        </StyledUserZonesContainer>
-        {/* END REMOVE */}
       </Wrapper>
+      {/* Remove modal after testing with Peter */}
+      <StyledModal visible={showDevInfoModal}>
+        <ModalBackDrop onPress={() => setShowDevInfoModal(false)} />
+        <StyledModalChildContainer>
+          <StyledServiceContainer>
+            <StyledHeader>Service Status:</StyledHeader>
+            <StyledServiceText>
+              {isServiceCalled ? 'Running' : 'Waiting'}
+            </StyledServiceText>
+          </StyledServiceContainer>
+          <StyledUserLocationContainer>
+            <StyledHeader>API call status:</StyledHeader>
+            <StyledApiText>
+              {apiCallStatus.length > 1 ? apiCallStatus : 'Waiting'}
+            </StyledApiText>
+          </StyledUserLocationContainer>
+
+          <StyledUserLocationContainer>
+            <StyledHeader>Location:</StyledHeader>
+            {location && (
+              <StyledBody>
+                {location.latitude}, {location.longitude}
+              </StyledBody>
+            )}
+          </StyledUserLocationContainer>
+
+          <StyledUserZonesContainer>
+            <StyledHeader>Zones:</StyledHeader>
+            {userZones && <StyledBody>{JSON.stringify(userZones)}</StyledBody>}
+          </StyledUserZonesContainer>
+        </StyledModalChildContainer>
+      </StyledModal>
     </StyledScreen>
   );
 };
@@ -335,10 +376,28 @@ const StyledUserZonesContainer = styled(StyledUserLocationContainer)`
   margin-top: 0;
 `;
 
+const StyledServiceContainer = styled(StyledUserLocationContainer)`
+  margin-top: 0;
+  flex-direction: row;
+  gap: 10px;
+`;
+
 const StyledHeader = styled(SubTitle)`
   font-weight: 900;
 `;
 const StyledBody = styled(Body)``;
-const StyledSericeText = styled(Body)`
+
+const StyledServiceText = styled(Body)`
   color: green;
+`;
+const StyledApiText = styled(Body)``;
+
+//
+const StyledModal = styled(Modal)`
+  width: 50%;
+`;
+
+const StyledModalChildContainer = styled(ModalChildContainer)`
+  padding: 20px;
+  width: 100%;
 `;

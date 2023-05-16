@@ -1,11 +1,9 @@
 import { LoginRequest } from '@src/api/types';
-
-const baseUrl =
-  'https://helsingborg-transport-visualization-backend-3ca3faqvfa-lz.a.run.app';
+import { BASE_URL } from '@src/utils/Contants';
 
 export const login = (request: LoginRequest) => {
   return new Promise((resolve, reject) => {
-    const url = baseUrl + '/auth/login/';
+    const url = BASE_URL + '/auth/login/';
 
     fetch(url, {
       method: 'POST',
@@ -17,11 +15,15 @@ export const login = (request: LoginRequest) => {
     })
       .then((res) => {
         if (!res.ok) {
-          reject(res.status);
+          return res.text().then((text) => {
+            throw new Error(text);
+          });
         }
+
         return res.json();
       })
       .then((res) => {
+        // console.log('User', res);
         resolve(res);
       })
       .catch(function (error) {
@@ -39,7 +41,7 @@ export const login = (request: LoginRequest) => {
 
 export const getOrganiztions = () => {
   return new Promise((resolve, reject) => {
-    const url = baseUrl + '/organisations';
+    const url = BASE_URL + '/organisations';
 
     fetch(url, {
       method: 'GET',
@@ -50,7 +52,9 @@ export const getOrganiztions = () => {
     })
       .then((res) => {
         if (!res.ok) {
-          reject(res.status);
+          return res.text().then((text) => {
+            throw new Error(text);
+          });
         }
         return res.json();
       })
