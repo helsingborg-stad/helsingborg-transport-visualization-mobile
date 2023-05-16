@@ -7,6 +7,7 @@ import { Platform } from 'react-native';
 import { useAuthContext } from '@src/context/auth';
 import { useGetTrackingTimeText } from '../hooks/useGetTrackingTimeText';
 import { useGetAllZones } from '@src/modules/zone/hooks/useGetAllZones';
+import * as turf from '@turf/turf';
 
 export const HomeScreen: FC = () => {
   const { logout } = useAuthContext();
@@ -23,8 +24,20 @@ export const HomeScreen: FC = () => {
   const { zones } = useGetAllZones();
 
   useEffect(() => {
-    //
-    console.log('Zone', zones.features[0].geometry.coordinates);
+    if (!zones) {
+      console.log('zones not ready yet');
+      return;
+    }
+
+    const pt = turf.point([12.730018737, 56.025278798]);
+    const features = zones.features;
+    features.forEach((zone, index) => {
+      const poly = zone;
+      const isInsideZone = turf.booleanPointInPolygon(pt, poly);
+      if (isInsideZone) {
+        console.log('User location is in this zone', index, zone);
+      }
+    });
   }, [zones]);
 
   return (
