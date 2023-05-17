@@ -17,7 +17,7 @@ export interface Organisation {
   updatedAt?: string;
 }
 
-export interface Feature {
+export interface ZoneFeature {
   type: 'Feature';
   geometry: Polygon;
   properties: {
@@ -33,7 +33,7 @@ export interface Feature {
 
 export type Zones = GeoJsonObject & {
   type: 'FeatureCollection';
-  features: [Feature];
+  features: [ZoneFeature];
 };
 
 export const a = 1;
