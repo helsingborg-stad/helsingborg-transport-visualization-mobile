@@ -1,4 +1,4 @@
-import React, { FC, useRef, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import styled from 'styled-components/native';
 import {
   SubTitle,
@@ -13,19 +13,15 @@ import {
 import Slider from '@react-native-community/slider';
 import { useTheme } from 'styled-components';
 import { Platform } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthContext } from '@src/context/auth';
 import { useGetTrackingTimeText } from '../hooks/useGetTrackingTimeText';
 import { useGetAllZones } from '@src/modules/zone/hooks/useGetAllZones';
-import * as turf from '@turf/turf';
 import {
   startForegroundUpdate,
   stopForegroundUpdate,
 } from '../services/ForgroundLocationService';
-import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Contants';
-import { User } from '@src/context/auth/AuthTypes';
-import { postEvent } from '@src/api/zone';
+import { useEventTask } from '../hooks/useEventTask';
 
 //
 //
@@ -37,12 +33,8 @@ export const HomeScreen: FC = () => {
   const [hoursToTrack, setHoursToTrack] = useState(8);
   const [isTracking, setIsTracking] = useState(false);
   const [showDevInfoModal, setShowDevInfoModal] = useState(false);
-  const [apiCallStatus, setApiCallStatus] = useState('');
-  //Foreground
-  const [location, setLocation] = useState(null);
-  const [userZones, setUserZones] = useState(null);
-  const [isServiceCalled, setIsServiceCalled] = useState(false);
-  const serviceTimeRef = useRef(null);
+  const [allZones, setAllZones] = useState(null);
+
   //Hooks
   const { currentStopTrackingTime, timeLeft } = useGetTrackingTimeText(
     hoursToTrack,
@@ -51,6 +43,16 @@ export const HomeScreen: FC = () => {
 
   //Get All getAllZones
   const { zones } = useGetAllZones();
+
+  const { EventTask, isServiceCalled, location, apiCallStatus, userZones } =
+    useEventTask(allZones);
+
+  //Set All Zones so the hooks can get them
+  useEffect(() => {
+    if (zones) {
+      setAllZones(zones);
+    }
+  }, [zones]);
 
   const toggleForegroundService = async () => {
     // stopForegroundUpdate();
@@ -61,171 +63,8 @@ export const HomeScreen: FC = () => {
     } else {
       await AsyncStorage.removeItem('zonesToSend');
       setIsTracking(true);
-      startForegroundUpdate(taskToRun);
+      startForegroundUpdate(EventTask);
       setShowDevInfoModal(true);
-    }
-  };
-
-  const taskToRun = async (location) => {
-    // if zones or location is not available then we cannot do anything
-    // just return
-    if (!zones || !location) {
-      console.log('zones or location not ready yet');
-      return;
-    }
-    // If we have a service call and it is called again before the limit
-    // we do nothing
-    if (serviceTimeRef.current) {
-      const currTime = Date.now();
-      const timeElapsed = currTime - serviceTimeRef.current;
-      if (timeElapsed < FOREGROUND_SERVICE_CALL_INTERVAL_TIME) {
-        console.log('Called Too Soon!');
-        return;
-      }
-    }
-
-    serviceTimeRef.current = Date.now();
-
-    //Dev only - Remove after Petter test the app
-    setIsServiceCalled(true);
-    setTimeout(() => {
-      setIsServiceCalled(false);
-    }, 3000);
-
-    setLocation(location);
-    //END REMOVE
-
-    // const pt = turf.point([12.730018737, 56.025278798]);
-    const pt = turf.point([location.latitude, location.longitude]);
-
-    //Check the local storage and see if there are any zones
-    let zonesToSend = [];
-
-    try {
-      const jsonValue = await AsyncStorage.getItem('zonesToSend');
-      zonesToSend = jsonValue != null ? JSON.parse(jsonValue) : null;
-    } catch (e) {
-      console.log('Failed to read zonesToSend');
-    }
-
-    if (zonesToSend) {
-      //Get Tracking ID
-      //check if we already have a tracking id in local storage
-      let trackingId = '';
-      const userStr = await SecureStore.getItemAsync('user');
-      const user: User = JSON.parse(userStr);
-
-      if (user) {
-        trackingId = user.trackingId;
-      }
-
-      let distributionZoneId = null;
-      // const newPt = turf.point([100.730018737, 100.025278798]);
-
-      zonesToSend.forEach(async (zone) => {
-        const poly = zone;
-        const isInsideZone = turf.booleanPointInPolygon(pt, poly);
-
-        if (!isInsideZone) {
-          if (
-            zone.properties.type &&
-            zone.properties.type.toLowerCase() === 'distribution'
-          ) {
-            distributionZoneId = zone.properties.id;
-            SecureStore.setItemAsync(
-              'distributionId',
-              JSON.stringify(zone.properties.id)
-            );
-          } else {
-            //Check if type distibution is in Local storage
-            const distributionId = await SecureStore.getItemAsync(
-              'distributionId'
-            );
-            if (distributionId) {
-              distributionZoneId = distributionId;
-            }
-          }
-          const foramttedZone = {
-            trackingId: trackingId,
-            distributionZoneId: distributionZoneId,
-            enteredAt: zone.properties.enteredAtTime,
-            exitedAt: new Date().toLocaleString('sv-SE', {
-              timeZone: 'UTC',
-              hour12: false,
-            }),
-          };
-          const eventID = zone.properties.id;
-          //Call the API
-          setApiCallStatus('Attempting to store event');
-          postEvent(eventID, foramttedZone)
-            .then(() => {
-              setApiCallStatus('Event stored successfully');
-            })
-            .catch((err) => {
-              setApiCallStatus(
-                'Could Not store Event, API call Failed -> ' + err
-              );
-            });
-
-          setTimeout(() => {
-            setApiCallStatus('');
-          }, 5000);
-        }
-      });
-    }
-
-    //After its done -> just move on as normal flow
-    const features = zones.features;
-    let userZones = [];
-    features.forEach(async (zone) => {
-      const poly = zone;
-      const isInsideZone = turf.booleanPointInPolygon(pt, poly);
-      if (isInsideZone) {
-        zone.properties.enteredAtTime = new Date().toLocaleString('sv-SE', {
-          timeZone: 'UTC',
-          hour12: false,
-        });
-        userZones = [...userZones, zone];
-      }
-    });
-
-    //If zones in local storage does not exist create a new one
-    if (zonesToSend) {
-      userZones.forEach((zone) => {
-        const tmpZone = zonesToSend.filter(
-          (z) => z.properties.id === zone.properties.id
-        );
-        if (!tmpZone) {
-          zonesToSend.push(zone);
-        }
-      });
-
-      //Dev only - Remove after Petter test the app
-      let userZoneName = [];
-      zonesToSend.forEach((zone: any) => {
-        userZoneName = [...userZoneName, zone.properties.name];
-      });
-      setUserZones(userZoneName);
-      //END REMOVE
-
-      try {
-        await AsyncStorage.setItem('zonesToSend', JSON.stringify(zonesToSend));
-      } catch (e) {
-        console.log('Failed to save zonesToSend in LocalStorage');
-      }
-    } else {
-      //Dev only - Remove after Petter test the app
-      let userZoneName = [];
-      userZones.forEach((zone) => {
-        userZoneName = [...userZoneName, zone.properties.name];
-      });
-      setUserZones(userZoneName);
-      //END REMOVE
-      try {
-        await AsyncStorage.setItem('zonesToSend', JSON.stringify(userZones));
-      } catch (e) {
-        console.log('Failed to save zonesToSend in LocalStorage');
-      }
     }
   };
 
