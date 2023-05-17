@@ -6,7 +6,7 @@ export function useGetTrackingTimeText(
 ) {
   const [currentStopTrackingTime, setCurrentStopTrackingTime] = useState('');
   const [timeLeft, setTimeLeft] = useState('');
-  const [endTime, setEndTime] = useState(null);
+  const [endTime, setEndTime] = useState<Date>(null);
 
   useEffect(() => {
     const StopTimeForamated = calculateHoursToStopTracking(hoursToTrack);

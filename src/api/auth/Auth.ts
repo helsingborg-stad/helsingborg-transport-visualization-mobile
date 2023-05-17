@@ -1,4 +1,4 @@
-import { LoginRequest } from '@src/api/types';
+import { LoginRequest, OrganisationResponse } from '@src/api/types';
 import { BASE_URL } from '@src/utils/Contants';
 
 export const login = (request: LoginRequest) => {
@@ -22,7 +22,7 @@ export const login = (request: LoginRequest) => {
 
         return res.json();
       })
-      .then((res) => {
+      .then((res: OrganisationResponse[]) => {
         // console.log('User', res);
         resolve(res);
       })

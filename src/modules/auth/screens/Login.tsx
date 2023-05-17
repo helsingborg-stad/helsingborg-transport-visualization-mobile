@@ -23,7 +23,6 @@ import { useTheme } from 'styled-components';
 import { getOrganiztions, login } from '@src/api/auth';
 import { OrganisationResponse, LoginResponse } from '@src/api/types';
 import { useAuthContext } from '@src/context/auth/AuthState';
-
 import { User } from '@src/context/auth/AuthTypes';
 
 export const LoginScreen: FC = () => {
@@ -40,8 +39,10 @@ export const LoginScreen: FC = () => {
   const [isOrgNotSelected, setIsOrgNotSelected] = useState(false);
   const [showOrganizationPopup, setShowOrganizationPopup] = useState(false);
   const [currentOrgIndex, setCurrentOrgIndex] = useState(-1);
-  const [organiazations, setOrganiazations] = useState([]);
-  const [organisationObject, setOrganisationObject] = useState({});
+  const [organiazations, setOrganiazations] = useState<string[]>([]);
+  const [organisationObject, setOrganisationObject] = useState<
+    OrganisationResponse[]
+  >([]);
   const [isLoadingOrgs, setIsLoadingOrgs] = useState(true);
   const [storedUser, setStoredUser] = useState<User | null>();
 
@@ -64,8 +65,7 @@ export const LoginScreen: FC = () => {
   useEffect(() => {
     const getDataFromStore = async () => {
       const userStr = await SecureStore.getItemAsync('user');
-
-      const userObj = await JSON.parse(userStr);
+      const userObj: User = await JSON.parse(userStr);
 
       if (userObj) {
         setCachedPin(userObj.pin);

@@ -8,7 +8,6 @@ import { AppState, AppStateStatus } from 'react-native';
 export function useLocationPermission() {
   //App State
   const appState = useRef(AppState.currentState);
-  const [, setAppStateVisible] = useState(appState.current);
 
   //LocalState
   const [isLocationPermissionGranted, setIsLocationPermissionGranted] =
@@ -39,7 +38,6 @@ export function useLocationPermission() {
     }
 
     appState.current = nextAppState;
-    setAppStateVisible(appState.current);
   };
 
   const getUserLocationPermission = async () => {

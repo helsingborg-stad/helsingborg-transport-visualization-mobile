@@ -7,7 +7,9 @@ import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Contants';
 import { User } from '@src/context/auth/AuthTypes';
 import { useGetAllZones } from '@src/modules/zone/hooks/useGetAllZones';
 import { ZoneFeature } from '../types';
+import { LocationObjectCoords } from 'expo-location';
 
+// Location.LocationObjectCoords
 type FormattedZone = {
   trackingId: string;
   distributionZoneId: string;
@@ -40,7 +42,7 @@ export function useEventTask() {
     eventID: string,
     formattedZone: FormattedZone,
     zoneID: string
-  ) => {
+  ): Promise<string> => {
     return new Promise((resolve, reject) => {
       postEvent(eventID, formattedZone)
         .then(() => {
@@ -52,7 +54,7 @@ export function useEventTask() {
     });
   };
 
-  const EventTask = async (location) => {
+  const EventTask = async (location: LocationObjectCoords) => {
     // if zones or location is not available then we cannot do anything
     // just return
     if (!zones || !location) {
@@ -108,7 +110,7 @@ export function useEventTask() {
       let distributionZoneId = null;
       const newPt = turf.point([100.730018737, 100.025278798]);
 
-      const promises: Promise<any>[] = [];
+      const promises: Promise<string>[] = [];
       //Check if type distibution is in Local storage
       const distributionId = await SecureStore.getItemAsync('distributionId');
       zonesToSend.forEach(async (zone) => {
