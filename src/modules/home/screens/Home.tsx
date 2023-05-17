@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useState } from 'react';
 import styled from 'styled-components/native';
 import {
   SubTitle,
@@ -16,7 +16,6 @@ import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthContext } from '@src/context/auth';
 import { useGetTrackingTimeText } from '../hooks/useGetTrackingTimeText';
-import { useGetAllZones } from '@src/modules/zone/hooks/useGetAllZones';
 import {
   startForegroundUpdate,
   stopForegroundUpdate,
@@ -33,7 +32,6 @@ export const HomeScreen: FC = () => {
   const [hoursToTrack, setHoursToTrack] = useState(8);
   const [isTracking, setIsTracking] = useState(false);
   const [showDevInfoModal, setShowDevInfoModal] = useState(false);
-  const [allZones, setAllZones] = useState(null);
 
   //Hooks
   const { currentStopTrackingTime, timeLeft } = useGetTrackingTimeText(
@@ -41,18 +39,8 @@ export const HomeScreen: FC = () => {
     isTracking
   );
 
-  //Get All getAllZones
-  const { zones } = useGetAllZones();
-
   const { EventTask, isServiceCalled, location, apiCallStatus, userZones } =
-    useEventTask(allZones);
-
-  //Set All Zones so the hooks can get them
-  useEffect(() => {
-    if (zones) {
-      setAllZones(zones);
-    }
-  }, [zones]);
+    useEventTask();
 
   const toggleForegroundService = async () => {
     // stopForegroundUpdate();

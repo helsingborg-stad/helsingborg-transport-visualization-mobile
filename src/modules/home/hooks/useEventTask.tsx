@@ -1,25 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { postEvent } from '@src/api/zone';
 import * as turf from '@turf/turf';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Contants';
 import { User } from '@src/context/auth/AuthTypes';
+import { useGetAllZones } from '@src/modules/zone/hooks/useGetAllZones';
 
-export function useEventTask(zonesArg: any) {
-  const [zones, setZones] = useState(null);
+export function useEventTask() {
   const [isServiceCalled, setIsServiceCalled] = useState(false);
   const [location, setLocation] = useState(null);
   const [apiCallStatus, setApiCallStatus] = useState('');
   const [userZones, setUserZones] = useState(null);
-
   const serviceTimeRef = useRef(null);
 
-  useEffect(() => {
-    if (zonesArg) {
-      setZones(zonesArg);
-    }
-  }, [zonesArg]);
+  //Get All getAllZones
+  const { zones } = useGetAllZones();
 
   const EventTask = async (location) => {
     // if zones or location is not available then we cannot do anything
@@ -101,7 +97,7 @@ export function useEventTask(zonesArg: any) {
             }
           }
           const foramttedZone = {
-            trackingId: trackingId + 'Bilawal Test',
+            trackingId: trackingId,
             distributionZoneId: distributionZoneId,
             enteredAt: zone.properties.enteredAtTime,
             exitedAt: new Date().toLocaleString('sv-SE', {
