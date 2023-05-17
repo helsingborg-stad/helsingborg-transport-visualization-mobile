@@ -35,5 +35,3 @@ export type Zones = GeoJsonObject & {
   type: 'FeatureCollection';
   features: [ZoneFeature];
 };
-
-export const a = 1;

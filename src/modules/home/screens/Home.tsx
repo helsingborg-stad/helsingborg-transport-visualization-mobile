@@ -20,6 +20,10 @@ import {
   startForegroundUpdate,
   stopForegroundUpdate,
 } from '../services/ForgroundLocationService';
+// import {
+//   startBackgroundUpdate,
+//   stopBackgroundUpdate,
+// } from '../services/BackgroundLocationService';
 import { useEventTask } from '../hooks/useEventTask';
 
 //
@@ -47,11 +51,13 @@ export const HomeScreen: FC = () => {
     if (isTracking) {
       setIsTracking(false);
       stopForegroundUpdate();
+      // stopBackgroundUpdate();
       logout();
     } else {
       await AsyncStorage.removeItem('zonesToSend');
       setIsTracking(true);
       startForegroundUpdate(EventTask);
+      // startBackgroundUpdate();
       setShowDevInfoModal(true);
     }
   };

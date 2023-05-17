@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Contants';
 import { User } from '@src/context/auth/AuthTypes';
-import { useGetAllZones } from '@src/modules/zone/hooks/useGetAllZones';
+import { useGetAllZones } from '@src/modules/home/hooks/useGetAllZones';
 import { ZoneFeature } from '../types';
 import { LocationObjectCoords } from 'expo-location';
 

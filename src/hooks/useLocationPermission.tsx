@@ -44,7 +44,7 @@ export function useLocationPermission() {
     const foreground = await Location.requestForegroundPermissionsAsync();
     if (foreground.granted) {
       setIsLocationPermissionGranted(true);
-      // await Location.requestBackgroundPermissionsAsync();
+      await Location.requestBackgroundPermissionsAsync();
     } else {
       setIsLocationPermissionGranted(false);
       setIsLocationPermissionDenied(true);

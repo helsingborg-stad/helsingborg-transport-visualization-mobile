@@ -12,26 +12,7 @@ import { ErrorBoundary } from '@src/modules/errorBoundary';
 import theme from '@src/theme/Theme';
 import { Navigation } from '@src/modules/navigation';
 import AuthProvider from '@src/context/auth/AuthState';
-import * as TaskManager from 'expo-task-manager';
-import { LOCATION_TASK_NAME } from '@src/utils/Contants';
-
-// Define the background task for location tracking
-TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
-  console.log('Task called');
-  if (error) {
-    console.error(error);
-    return;
-  }
-  if (data) {
-    // Extract location coordinates from data
-    const { locations } = data;
-    const location = locations[0];
-    if (location) {
-      console.log('Location in background', location.coords);
-    }
-  }
-});
-
+import '@src/taskManager/TaskManager';
 const queryClient = new QueryClient();
 
 export default function App() {
