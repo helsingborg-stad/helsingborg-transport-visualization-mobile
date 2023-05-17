@@ -17,6 +17,29 @@ export function useEventTask() {
   //Get All getAllZones
   const { zones } = useGetAllZones();
 
+  //Test Only Methods: For Petter
+  const setZoneNamesForUser = (zones) => {
+    //Dev only - Remove after Petter test the app
+    let userZoneName = [];
+    zones.forEach((zone) => {
+      userZoneName = [...userZoneName, zone.properties.name];
+    });
+    setUserZones(userZoneName);
+    //END REMOVE
+  };
+
+  const sendEventToServer = (eventID, formattedZone, zoneID) => {
+    return new Promise((resolve, reject) => {
+      postEvent(eventID, formattedZone)
+        .then(() => {
+          resolve(zoneID);
+        })
+        .catch(() => {
+          reject(zoneID);
+        });
+    });
+  };
+
   const EventTask = async (location) => {
     // if zones or location is not available then we cannot do anything
     // just return
@@ -73,6 +96,9 @@ export function useEventTask() {
       let distributionZoneId = null;
       const newPt = turf.point([100.730018737, 100.025278798]);
 
+      const promises = [];
+      //Check if type distibution is in Local storage
+      const distributionId = await SecureStore.getItemAsync('distributionId');
       zonesToSend.forEach(async (zone) => {
         const poly = zone;
         const isInsideZone = turf.booleanPointInPolygon(newPt, poly);
@@ -88,10 +114,6 @@ export function useEventTask() {
               JSON.stringify(zone.properties.id)
             );
           } else {
-            //Check if type distibution is in Local storage
-            const distributionId = await SecureStore.getItemAsync(
-              'distributionId'
-            );
             if (distributionId) {
               distributionZoneId = distributionId;
             }
@@ -108,23 +130,56 @@ export function useEventTask() {
           const eventID = zone.properties.id;
           //Call the API
           setApiCallStatus('Attempting to store event');
-          postEvent(eventID, foramttedZone)
-            .then(() => {
-              setApiCallStatus('Event stored successfully');
-            })
-            .catch((err) => {
-              setApiCallStatus(
-                'Could Not store Event, API call Failed -> ' + err
-              );
-            });
-
-          setTimeout(() => {
-            setApiCallStatus('');
-          }, 5000);
+          const result = sendEventToServer(
+            eventID,
+            foramttedZone,
+            zone.properties.id
+          );
+          promises.push(result);
         }
       });
-    }
 
+      Promise.all(promises)
+        .then(async (results) => {
+          console.log('All done', results);
+          setApiCallStatus(
+            'Event stored successfully (' + results.length + ')'
+          );
+          //Now remove the zones from the zonesToSend
+          const filteredZones = zonesToSend.filter(
+            (z) => !results.includes(z.properties.id)
+          );
+          if (filteredZones.length < 1) {
+            //delete the zonesToSend local storage
+            await AsyncStorage.removeItem('zonesToSend');
+            zonesToSend = null;
+            //Dev only - Remove after Petter test the app
+            setZoneNamesForUser([]);
+            //END REMOVE
+          } else {
+            try {
+              await AsyncStorage.setItem(
+                'zonesToSend',
+                JSON.stringify(filteredZones)
+              );
+            } catch (e) {
+              console.log('Failed to save zonesToSend in LocalStorage');
+            }
+            //Dev only - Remove after Petter test the app
+            setZoneNamesForUser(filteredZones);
+            //END REMOVE
+          }
+        })
+        .catch((err) => {
+          console.log('Failed to store an event', err);
+          setApiCallStatus('Could Not store Event, API call Failed -> ' + err);
+        });
+      //Clear the API status string
+      setTimeout(() => {
+        setApiCallStatus('');
+      }, 3000);
+    }
+    // return;
     //After its done -> just move on as normal flow
     const features = zones.features;
     let userZones = [];
@@ -151,29 +206,20 @@ export function useEventTask() {
         }
       });
 
-      //Dev only - Remove after Petter test the app
-      let userZoneName = [];
-      zonesToSend.forEach((zone: any) => {
-        userZoneName = [...userZoneName, zone.properties.name];
-      });
-      setUserZones(userZoneName);
-      //END REMOVE
-
       try {
         await AsyncStorage.setItem('zonesToSend', JSON.stringify(zonesToSend));
+        //Dev only - Remove after Petter test the app
+        setZoneNamesForUser(zonesToSend);
+        //END REMOVE
       } catch (e) {
         console.log('Failed to save zonesToSend in LocalStorage');
       }
     } else {
-      //Dev only - Remove after Petter test the app
-      let userZoneName = [];
-      userZones.forEach((zone) => {
-        userZoneName = [...userZoneName, zone.properties.name];
-      });
-      setUserZones(userZoneName);
-      //END REMOVE
       try {
         await AsyncStorage.setItem('zonesToSend', JSON.stringify(userZones));
+        //Dev only - Remove after Petter test the app
+        setZoneNamesForUser(userZones);
+        //END REMOVE
       } catch (e) {
         console.log('Failed to save zonesToSend in LocalStorage');
       }
