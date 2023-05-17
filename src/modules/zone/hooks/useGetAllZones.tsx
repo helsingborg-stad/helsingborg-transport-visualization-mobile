@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { getAllZones } from '@src/api/zone';
+import { Zones } from '@src/modules/home/types';
 
 export function useGetAllZones() {
-  const [zones, setZones] = useState<any>(null);
+  const [zones, setZones] = useState<Zones>(null);
   useEffect(() => {
     getAllZones()
-      .then((res) => {
+      .then((res: Zones) => {
         setZones(res);
       })
       .catch((err) => {

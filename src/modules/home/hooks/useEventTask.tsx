@@ -6,29 +6,41 @@ import * as SecureStore from 'expo-secure-store';
 import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Contants';
 import { User } from '@src/context/auth/AuthTypes';
 import { useGetAllZones } from '@src/modules/zone/hooks/useGetAllZones';
+import { ZoneFeature } from '../types';
+
+type FormattedZone = {
+  trackingId: string;
+  distributionZoneId: string;
+  enteredAt: string;
+  exitedAt: string;
+};
 
 export function useEventTask() {
   const [isServiceCalled, setIsServiceCalled] = useState(false);
   const [location, setLocation] = useState(null);
-  const [apiCallStatus, setApiCallStatus] = useState('');
-  const [userZones, setUserZones] = useState(null);
+  const [apiCallStatus, setApiCallStatus] = useState<string>('');
+  const [userZones, setUserZones] = useState<ZoneFeature[]>(null);
   const serviceTimeRef = useRef(null);
 
   //Get All getAllZones
   const { zones } = useGetAllZones();
 
   //Test Only Methods: For Petter
-  const setZoneNamesForUser = (zones) => {
+  const setZoneNamesForUser = (zonesToParse: ZoneFeature[]) => {
     //Dev only - Remove after Petter test the app
     let userZoneName = [];
-    zones.forEach((zone) => {
+    zonesToParse.forEach((zone) => {
       userZoneName = [...userZoneName, zone.properties.name];
     });
     setUserZones(userZoneName);
     //END REMOVE
   };
 
-  const sendEventToServer = (eventID, formattedZone, zoneID) => {
+  const sendEventToServer = (
+    eventID: string,
+    formattedZone: FormattedZone,
+    zoneID: string
+  ) => {
     return new Promise((resolve, reject) => {
       postEvent(eventID, formattedZone)
         .then(() => {
@@ -73,7 +85,7 @@ export function useEventTask() {
     // const pt = turf.point([location.latitude, location.longitude]);
 
     //Check the local storage and see if there are any zones
-    let zonesToSend = [];
+    let zonesToSend: ZoneFeature[] = [];
 
     try {
       const jsonValue = await AsyncStorage.getItem('zonesToSend');
@@ -96,7 +108,7 @@ export function useEventTask() {
       let distributionZoneId = null;
       const newPt = turf.point([100.730018737, 100.025278798]);
 
-      const promises = [];
+      const promises: Promise<any>[] = [];
       //Check if type distibution is in Local storage
       const distributionId = await SecureStore.getItemAsync('distributionId');
       zonesToSend.forEach(async (zone) => {
@@ -182,7 +194,7 @@ export function useEventTask() {
     // return;
     //After its done -> just move on as normal flow
     const features = zones.features;
-    let userZones = [];
+    let tmpUserZones: ZoneFeature[] = [];
     features.forEach(async (zone) => {
       const poly = zone;
       const isInsideZone = turf.booleanPointInPolygon(pt, poly);
@@ -191,13 +203,13 @@ export function useEventTask() {
           timeZone: 'UTC',
           hour12: false,
         });
-        userZones = [...userZones, zone];
+        tmpUserZones = [...tmpUserZones, zone];
       }
     });
 
     //If zones in local storage does not exist create a new one
     if (zonesToSend) {
-      userZones.forEach((zone) => {
+      tmpUserZones.forEach((zone) => {
         const tmpZone = zonesToSend.filter(
           (z) => z.properties.id === zone.properties.id
         );
@@ -216,9 +228,9 @@ export function useEventTask() {
       }
     } else {
       try {
-        await AsyncStorage.setItem('zonesToSend', JSON.stringify(userZones));
+        await AsyncStorage.setItem('zonesToSend', JSON.stringify(tmpUserZones));
         //Dev only - Remove after Petter test the app
-        setZoneNamesForUser(userZones);
+        setZoneNamesForUser(tmpUserZones);
         //END REMOVE
       } catch (e) {
         console.log('Failed to save zonesToSend in LocalStorage');

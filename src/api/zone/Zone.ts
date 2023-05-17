@@ -1,6 +1,7 @@
 import { User } from '@src/context/auth/AuthTypes';
 import * as SecureStore from 'expo-secure-store';
 import { BASE_URL } from '@src/utils/Contants';
+import { Zones } from '@src/modules/home/types';
 
 export const getAllZones = () => {
   return new Promise(async (resolve, reject) => {
@@ -25,7 +26,7 @@ export const getAllZones = () => {
         }
         return res.json();
       })
-      .then((res) => {
+      .then((res: Zones) => {
         resolve(res);
       })
       .catch(function (error) {
