@@ -17,7 +17,7 @@ export const startForegroundUpdate = async (callback) => {
   foregroundSubscription = await Location.watchPositionAsync(
     {
       // For better logs, we set the accuracy to the most sensitive option
-      accuracy: Location.Accuracy.BestForNavigation,
+      accuracy: Location.Accuracy.High,
       timeInterval: FOREGROUND_SERVICE_CALL_INTERVAL_TIME,
       distanceInterval: 0,
     },

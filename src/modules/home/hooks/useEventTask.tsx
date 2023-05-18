@@ -9,7 +9,6 @@ import { useGetAllZones } from '@src/modules/home/hooks/useGetAllZones';
 import { ZoneFeature } from '../types';
 import { LocationObjectCoords } from 'expo-location';
 
-// Location.LocationObjectCoords
 type FormattedZone = {
   trackingId: string;
   distributionZoneId: string;
@@ -133,7 +132,7 @@ export function useEventTask() {
             }
           }
           const foramttedZone = {
-            trackingId: trackingId,
+            trackingId: trackingId + ' BG-SERICE-TEST-22',
             distributionZoneId: distributionZoneId,
             enteredAt: zone.properties.enteredAtTime,
             exitedAt: new Date().toLocaleString('sv-SE', {

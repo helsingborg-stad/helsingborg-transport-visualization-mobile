@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import styled from 'styled-components/native';
 import {
   SubTitle,
@@ -16,14 +16,14 @@ import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthContext } from '@src/context/auth';
 import { useGetTrackingTimeText } from '../hooks/useGetTrackingTimeText';
+import * as BackgroundFetch from 'expo-background-fetch';
+import * as TaskManager from 'expo-task-manager';
+import { LOCATION_TASK_NAME } from '@src/utils/Contants';
+import { userLocation } from '@src/taskManager/TaskManager';
 import {
-  startForegroundUpdate,
-  stopForegroundUpdate,
-} from '../services/ForgroundLocationService';
-// import {
-//   startBackgroundUpdate,
-//   stopBackgroundUpdate,
-// } from '../services/BackgroundLocationService';
+  stopBackgroundUpdate,
+  startBackgroundUpdate,
+} from '../services/BackgroundLocationService';
 import { useEventTask } from '../hooks/useEventTask';
 
 //
@@ -46,20 +46,41 @@ export const HomeScreen: FC = () => {
   const { EventTask, isServiceCalled, location, apiCallStatus, userZones } =
     useEventTask();
 
+  useEffect(() => {
+    if (userLocation) {
+      EventTask(userLocation);
+    }
+  }, [userLocation]);
+
   const toggleForegroundService = async () => {
-    // stopForegroundUpdate();
     if (isTracking) {
       setIsTracking(false);
-      stopForegroundUpdate();
-      // stopBackgroundUpdate();
+      stopBackgroundUpdate();
       logout();
     } else {
       await AsyncStorage.removeItem('zonesToSend');
       setIsTracking(true);
-      startForegroundUpdate(EventTask);
-      // startBackgroundUpdate();
+      startBackgroundUpdate();
       setShowDevInfoModal(true);
     }
+
+    checkStatusAsync();
+  };
+
+  React.useEffect(() => {
+    checkStatusAsync();
+  }, []);
+
+  const checkStatusAsync = async () => {
+    const status = await BackgroundFetch.getStatusAsync();
+    const isRegistered = await TaskManager.isTaskRegisteredAsync(
+      LOCATION_TASK_NAME
+    );
+    console.log(
+      ' ===========> Background Service - ',
+      BackgroundFetch.BackgroundFetchStatus[status],
+      isRegistered
+    );
   };
 
   return (

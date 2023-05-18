@@ -1,6 +1,7 @@
-import { LOCATION_TASK_NAME } from '@src/utils/Contants';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
+import { LOCATION_TASK_NAME } from '@src/utils/Contants';
+import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Contants';
 
 // Start location tracking in background
 export const startBackgroundUpdate = async () => {
@@ -27,10 +28,10 @@ export const startBackgroundUpdate = async () => {
     return;
   }
   console.log('startiang the task');
-  const a = await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+  await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
     // For better logs, we set the accuracy to the most sensitive option
-    accuracy: Location.Accuracy.BestForNavigation,
-    timeInterval: 1000 * 5,
+    accuracy: Location.Accuracy.High,
+    timeInterval: FOREGROUND_SERVICE_CALL_INTERVAL_TIME,
     distanceInterval: 0,
     // Make sure to enable this notification if you want to consistently track in the background
     showsBackgroundLocationIndicator: true,
@@ -40,7 +41,6 @@ export const startBackgroundUpdate = async () => {
       notificationColor: '#fff',
     },
   });
-  console.log('a, a', a);
 };
 
 // Stop location tracking in background
