@@ -3,18 +3,12 @@ import { postEvent } from '@src/api/zone';
 import * as turf from '@turf/turf';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
-import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Contants';
+import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Constants';
 import { User } from '@src/context/auth/AuthTypes';
 import { useGetAllZones } from '@src/modules/home/hooks/useGetAllZones';
 import { ZoneFeature } from '../types';
 import { LocationObjectCoords } from 'expo-location';
-
-type FormattedZone = {
-  trackingId: string;
-  distributionZoneId: string;
-  enteredAt: string;
-  exitedAt: string;
-};
+import { EventRequestType } from '@src/api/types';
 
 export function useEventTask() {
   const [isServiceCalled, setIsServiceCalled] = useState(false);
@@ -39,7 +33,7 @@ export function useEventTask() {
 
   const sendEventToServer = (
     eventID: string,
-    formattedZone: FormattedZone,
+    formattedZone: EventRequestType,
     zoneID: string
   ): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -110,7 +104,7 @@ export function useEventTask() {
       const newPt = turf.point([100.730018737, 100.025278798]);
 
       const promises: Promise<string>[] = [];
-      //Check if type distibution is in Local storage
+      //Check if type distribution is in Local storage
       const distributionId = await SecureStore.getItemAsync('distributionId');
       zonesToSend.forEach(async (zone) => {
         const poly = zone;
@@ -131,8 +125,8 @@ export function useEventTask() {
               distributionZoneId = distributionId;
             }
           }
-          const foramttedZone = {
-            trackingId: trackingId + ' BG-SERICE-TEST-22',
+          const formattedZone = {
+            trackingId: trackingId,
             distributionZoneId: distributionZoneId,
             enteredAt: zone.properties.enteredAtTime,
             exitedAt: new Date().toLocaleString('sv-SE', {
@@ -145,7 +139,7 @@ export function useEventTask() {
           setApiCallStatus('Attempting to store event');
           const result = sendEventToServer(
             eventID,
-            foramttedZone,
+            formattedZone,
             zone.properties.id
           );
           promises.push(result);

@@ -48,7 +48,7 @@ client.interceptors.response.use(undefined, async (error) => {
           pinCode: userCred.pinCode,
         })
         .then(async (response) => {
-          console.log('Axios Instace response', response);
+          console.log('Axios Instance response', response);
           // const newToken = response.data.token;
           // const token = await SecureStore.getItemAsync('token');
           // if (token) {

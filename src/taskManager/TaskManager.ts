@@ -1,9 +1,9 @@
-import { LOCATION_TASK_NAME } from '@src/utils/Contants';
+import { LOCATION_TASK_NAME } from '@src/utils/Constants';
 import * as TaskManager from 'expo-task-manager';
 import { LocationObjectCoords } from 'expo-location';
 
-// This globle variable is used to share information between
-// Taskmanager and Components
+// This global variable is used to share information between
+// Task manager and Components
 // For now it just sends User location coords
 export let userLocation: LocationObjectCoords = null;
 

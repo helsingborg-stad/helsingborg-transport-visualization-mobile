@@ -9,8 +9,8 @@ export function useGetTrackingTimeText(
   const [endTime, setEndTime] = useState<Date>(null);
 
   useEffect(() => {
-    const StopTimeForamated = calculateHoursToStopTracking(hoursToTrack);
-    setCurrentStopTrackingTime(StopTimeForamated);
+    const StopTimeFormatted = calculateHoursToStopTracking(hoursToTrack);
+    setCurrentStopTrackingTime(StopTimeFormatted);
   }, [hoursToTrack]);
 
   //Get Time Remaining
@@ -21,7 +21,7 @@ export function useGetTrackingTimeText(
     setTimeLeft(timeLeft);
   }, [endTime]);
 
-  //Set an interval to auto calculate the time remaning
+  //Set an interval to auto calculate the time remaining
   useEffect(() => {
     if (!endTime || !startTimer) return;
     const interval = setInterval(() => {
@@ -35,12 +35,12 @@ export function useGetTrackingTimeText(
   const calculateHoursToStopTracking = (hours: number) => {
     const hoursToAdd = 1000 * 60 * 60 * hours;
     const stopTime = new Date(new Date().getTime() + hoursToAdd);
-    let StopTimeForamated = stopTime.toLocaleString([], {
+    let StopTimeFormatted = stopTime.toLocaleString([], {
       hour12: false,
     });
-    StopTimeForamated = StopTimeForamated.slice(-8).slice(0, -3);
+    StopTimeFormatted = StopTimeFormatted.slice(-8).slice(0, -3);
     setEndTime(stopTime);
-    return StopTimeForamated;
+    return StopTimeFormatted;
   };
 
   const getTimeDifference = (startTime, endTime) => {

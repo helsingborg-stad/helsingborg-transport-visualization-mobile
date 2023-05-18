@@ -15,7 +15,7 @@ type StyledPinProps = {
 
 //
 // This component Renders the PinCode control
-// Instead of 6 inputs it uses only one so Its efficent and fast
+// Instead of 6 inputs it uses only one so Its efficient and fast
 // Because if this its not too complex either
 // We move the original input text outside of the screen and use
 // Texts to show the pin and for caret we just animate a View with
@@ -103,7 +103,7 @@ export const PinCodeInput: React.FC<PinCodeInputProps> = ({
         keyboardType={'number-pad'}
         textAlign={'center'}
         onBlur={handleOnBlur}
-        //Workaroud for carret if text aligned center - Android
+        //Workaround for caret if text aligned center - Android
         multiline={true}
         numberOfLines={1}
         style={{

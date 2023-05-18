@@ -18,7 +18,7 @@ import { useAuthContext } from '@src/context/auth';
 import { useGetTrackingTimeText } from '../hooks/useGetTrackingTimeText';
 import * as BackgroundFetch from 'expo-background-fetch';
 import * as TaskManager from 'expo-task-manager';
-import { LOCATION_TASK_NAME } from '@src/utils/Contants';
+import { LOCATION_TASK_NAME } from '@src/utils/Constants';
 import { userLocation } from '@src/taskManager/TaskManager';
 import {
   stopBackgroundUpdate,
@@ -102,11 +102,11 @@ export const HomeScreen: FC = () => {
             onValueChange={(val) => setHoursToTrack(val)}
             step={1}
           />
-          <SliderMinMaxContiner>
+          <SliderMinMaxContainer>
             <StyledRangeText>1 h</StyledRangeText>
             <Filler />
             <StyledRangeText>12 h</StyledRangeText>
-          </SliderMinMaxContiner>
+          </SliderMinMaxContainer>
         </SliderContainer>
         <StyleButton
           title={isTracking ? 'Stoppa körning' : 'Starta körning'}
@@ -196,7 +196,7 @@ const SliderContainer = styled.View`
   align-items: center;
 `;
 
-const SliderMinMaxContiner = styled.View`
+const SliderMinMaxContainer = styled.View`
   flex-direction: row;
   justify-content: center;
   align-items: center;

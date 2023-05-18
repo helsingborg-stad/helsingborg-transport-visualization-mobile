@@ -1,5 +1,5 @@
 import { LoginRequest, OrganisationResponse } from '@src/api/types';
-import { BASE_URL } from '@src/utils/Contants';
+import { BASE_URL } from '@src/utils/Constants';
 
 export const login = (request: LoginRequest) => {
   return new Promise((resolve, reject) => {

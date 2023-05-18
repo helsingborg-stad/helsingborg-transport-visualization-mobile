@@ -30,7 +30,7 @@ export const LoginScreen: FC = () => {
   const { setUser } = useAuthContext();
 
   //Button States
-  const [isLoggingIn, setisLoggingIn] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   //Pin code states
   const [pin, setPin] = useState('');
   const [cachedPin, setCachedPin] = useState('');
@@ -104,7 +104,7 @@ export const LoginScreen: FC = () => {
   const handlePinSubmit = async () => {
     setIsPinError(false);
     setIsOrgNotSelected(false);
-    setisLoggingIn(true);
+    setIsLoggingIn(true);
 
     if (currentOrgIndex === -1) {
       setIsOrgNotSelected(true);
@@ -140,13 +140,13 @@ export const LoginScreen: FC = () => {
 
         setUser(userObj);
 
-        setisLoggingIn(false);
+        setIsLoggingIn(false);
       })
       .catch((err) => {
         console.log('err', err);
         setIsPinError(true);
         setPin('');
-        setisLoggingIn(false);
+        setIsLoggingIn(false);
       });
   };
 

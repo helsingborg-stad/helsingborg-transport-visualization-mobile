@@ -1,7 +1,7 @@
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
-import { LOCATION_TASK_NAME } from '@src/utils/Contants';
-import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Contants';
+import { LOCATION_TASK_NAME } from '@src/utils/Constants';
+import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Constants';
 
 // Start location tracking in background
 export const startBackgroundUpdate = async () => {

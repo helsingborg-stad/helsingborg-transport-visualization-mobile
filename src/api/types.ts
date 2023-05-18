@@ -24,3 +24,10 @@ export type OrganisationResponse = {
   orgNumber: string;
   updatedAt: string;
 };
+
+export type EventRequestType = {
+  trackingId: string;
+  distributionZoneId: string;
+  enteredAt: string;
+  exitedAt: string;
+};

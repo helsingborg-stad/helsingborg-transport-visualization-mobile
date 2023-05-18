@@ -7,6 +7,8 @@ import {
   Platform,
   ScrollView,
   ScrollViewProps,
+  StyleProp,
+  ViewStyle,
 } from 'react-native';
 
 import {
@@ -18,7 +20,7 @@ import theme from '@src/theme/Theme';
 
 interface BaseScreenProps {
   children?: React.ReactNode;
-  contentContainerStyle?: any;
+  contentContainerStyle?: StyleProp<ViewStyle>;
   safeAreaEdges?: ExtendedEdge[];
   backgroundColor?: string;
   statusBarStyle?: 'light' | 'dark';

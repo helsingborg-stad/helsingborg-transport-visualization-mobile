@@ -92,7 +92,7 @@ const theme = {
     medium: typography.primary.medium,
     semibold: typography.primary.semiBold,
     bold: typography.primary.bold,
-    // Just in case we need other varients
+    // Just in case we need other variants
     primary: typography.primary,
     secondary: typography.secondary,
     code: typography.code,

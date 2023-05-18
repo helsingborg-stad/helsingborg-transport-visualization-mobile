@@ -1,4 +1,4 @@
-import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Contants';
+import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Constants';
 import * as Location from 'expo-location';
 let foregroundSubscription = null;
 

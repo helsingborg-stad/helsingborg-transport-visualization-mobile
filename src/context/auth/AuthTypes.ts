@@ -53,7 +53,7 @@ type Logout = {
 
 export type Action = SetUser | Logout;
 
-export interface AuthContextProps extends AuthState {
+export interface AuthContextProps extends Partial<AuthState> {
   setUser: (user: User) => Promise<void>;
   logout: () => void;
 }

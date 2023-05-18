@@ -1,7 +1,8 @@
 import { User } from '@src/context/auth/AuthTypes';
 import * as SecureStore from 'expo-secure-store';
-import { BASE_URL } from '@src/utils/Contants';
+import { BASE_URL } from '@src/utils/Constants';
 import { Zones } from '@src/modules/home/types';
+import { EventRequestType } from '../types';
 
 export const getAllZones = () => {
   return new Promise(async (resolve, reject) => {
@@ -35,7 +36,7 @@ export const getAllZones = () => {
   });
 };
 
-export const postEvent = (id, request) => {
+export const postEvent = (id: string, request: EventRequestType) => {
   return new Promise(async (resolve, reject) => {
     const url = BASE_URL + `/zones/${id}/events`;
     const token = await getUserToken();

@@ -20,7 +20,7 @@ export default function App() {
 
   // Wait until our fonts are loaded
   // We should add a proper screen or extend the Splash Screen
-  // for this purpise
+  // for this purpose
   if (!areFontsLoaded)
     return (
       <Container>
