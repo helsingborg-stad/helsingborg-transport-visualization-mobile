@@ -1,43 +1,37 @@
 import React from 'react';
 import styled from 'styled-components/native';
-import { Linking } from 'react-native';
-import {
-  Screen,
-  LargeTitle,
-  Body,
-  Button,
-  ActivityIndicator,
-} from '@src/components';
+import { Screen, LargeTitle, Body, Button } from '@src/components';
+import * as Location from 'expo-location';
 
-type PermissionNotGrantedProps = {
-  isDenied: boolean;
+type Props = {
+  setPermissionStatus: (val: boolean) => void;
 };
 
-export const PermissionNotGranted: React.FC<PermissionNotGrantedProps> = ({
-  isDenied,
+export const LocationBackgroundPermissionNeeded: React.FC<Props> = ({
+  setPermissionStatus,
 }) => {
+  const handlePermission = async () => {
+    const status = await Location.requestBackgroundPermissionsAsync();
+    console.log('status bg location', status);
+    if (status.granted) {
+      setPermissionStatus(true);
+    }
+  };
   return (
     <StyledScreen>
       <Wrapper>
-        {!isDenied && <ActivityIndicator size={'large'} />}
-        {isDenied && (
-          <ErrorContainer>
-            <StyledTitle>Hoppsan!</StyledTitle>
-            <ErrorText>
-              Platsinfo behöver vara aktiverad för att Sam ska fungera.
-            </ErrorText>
-            <ErrorText>
-              Klicka på knappen för att tillåta plastinfo i inställningar.
-            </ErrorText>
-            <StyleButton
-              title={'Tillåt åtkomst till platsinfo'}
-              onPress={() => {
-                Linking.openSettings();
-              }}
-              type="primary"
-            />
-          </ErrorContainer>
-        )}
+        <ErrorContainer>
+          <StyledTitle>Ge appen platsåtkomst</StyledTitle>
+          <ErrorText>
+            För att Sam ska kunna spåra din plats behöver du aktivera
+            alternativet "Tillåt alltid" i inställningar.
+          </ErrorText>
+          <StyleButton
+            title={'Tillåt alltid” i inställningar'}
+            onPress={handlePermission}
+            type="primary"
+          />
+        </ErrorContainer>
       </Wrapper>
     </StyledScreen>
   );

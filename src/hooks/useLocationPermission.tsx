@@ -1,6 +1,6 @@
 import * as Location from 'expo-location';
 import { useEffect, useRef, useState } from 'react';
-import { AppState, AppStateStatus } from 'react-native';
+import { AppState, AppStateStatus, Platform } from 'react-native';
 
 //
 // https://github.com/expo/expo/issues/16701#issuecomment-1270111253
@@ -14,6 +14,10 @@ export function useLocationPermission() {
     useState(false);
   const [isLocationPermissionDenied, setIsLocationPermissionDenied] =
     useState(false);
+  const [
+    isLocationBackgroundPermissionNeeded,
+    setIsLocationBackgroundPermissionNeeded,
+  ] = useState(false);
 
   useEffect(() => {
     getUserLocationPermission();
@@ -41,12 +45,27 @@ export function useLocationPermission() {
   };
 
   const getUserLocationPermission = async () => {
-    const foreground = await Location.requestForegroundPermissionsAsync();
-    if (foreground.granted) {
+    const fgStatus = await Location.getForegroundPermissionsAsync();
+    const bgStatus = await Location.getBackgroundPermissionsAsync();
+
+    if (fgStatus.granted && bgStatus.granted) {
       setIsLocationPermissionGranted(true);
-      await Location.requestBackgroundPermissionsAsync();
+      return;
+    }
+
+    if (!fgStatus.granted && fgStatus.canAskAgain) {
+      const tmpStatus = await Location.requestForegroundPermissionsAsync();
+      if (tmpStatus.granted) {
+        setIsLocationPermissionGranted(true);
+        if (Platform.OS === 'ios') {
+          await Location.requestBackgroundPermissionsAsync();
+        } else {
+          setIsLocationBackgroundPermissionNeeded(true);
+        }
+      } else {
+        setIsLocationPermissionDenied(true);
+      }
     } else {
-      setIsLocationPermissionGranted(false);
       setIsLocationPermissionDenied(true);
     }
   };
@@ -54,5 +73,6 @@ export function useLocationPermission() {
   return {
     isLocationPermissionGranted,
     isLocationPermissionDenied,
+    isLocationBackgroundPermissionNeeded,
   };
 }

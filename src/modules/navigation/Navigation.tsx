@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import styled from 'styled-components/native';
@@ -7,6 +7,7 @@ import { useAuthContext } from '@src/context/auth';
 import { HomeStack } from './HomeStack';
 import { useLocationPermission } from '@src/hooks/useLocationPermission';
 import { PermissionNotGranted } from '@src/modules/permissionNotGranted/screens';
+import { LocationBackgroundPermissionNeeded } from '../locationBackgroundPermissionNeeded/screens';
 
 const Container = styled.View`
   flex: 1;
@@ -17,11 +18,23 @@ const Container = styled.View`
 
 export const Navigation = () => {
   const { isLoading, isLoggedIn } = useAuthContext();
-  const { isLocationPermissionGranted, isLocationPermissionDenied } =
-    useLocationPermission();
+  const [locationBgPermissionStatus, setLocationBgPermissionStatus] =
+    useState(false);
+  const {
+    isLocationPermissionGranted,
+    isLocationPermissionDenied,
+    isLocationBackgroundPermissionNeeded,
+  } = useLocationPermission();
 
   if (!isLocationPermissionGranted) {
     return <PermissionNotGranted isDenied={isLocationPermissionDenied} />;
+  }
+  if (isLocationBackgroundPermissionNeeded && !locationBgPermissionStatus) {
+    return (
+      <LocationBackgroundPermissionNeeded
+        setPermissionStatus={setLocationBgPermissionStatus}
+      />
+    );
   }
 
   if (isLoading) {
