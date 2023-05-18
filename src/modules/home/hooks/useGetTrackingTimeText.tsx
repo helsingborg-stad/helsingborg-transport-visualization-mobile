@@ -1,16 +1,22 @@
 import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function useGetTrackingTimeText(
   hoursToTrack: number,
-  startTimer: boolean
+  isTracking: boolean
 ) {
   const [currentStopTrackingTime, setCurrentStopTrackingTime] = useState('');
   const [timeLeft, setTimeLeft] = useState('');
   const [endTime, setEndTime] = useState<Date>(null);
 
   useEffect(() => {
-    const StopTimeFormatted = calculateHoursToStopTracking(hoursToTrack);
-    setCurrentStopTrackingTime(StopTimeFormatted);
+    const getStopTimeFormatted = async () => {
+      const StopTimeFormatted = await calculateHoursToStopTracking(
+        hoursToTrack
+      );
+      setCurrentStopTrackingTime(StopTimeFormatted);
+    };
+    getStopTimeFormatted();
   }, [hoursToTrack]);
 
   //Get Time Remaining
@@ -23,18 +29,32 @@ export function useGetTrackingTimeText(
 
   //Set an interval to auto calculate the time remaining
   useEffect(() => {
-    if (!endTime || !startTimer) return;
+    if (!endTime || !isTracking) return;
     const interval = setInterval(() => {
       const today = new Date();
       const timeLeft = getTimeDifference(today, endTime);
       setTimeLeft(timeLeft);
     }, 1000);
     return () => clearInterval(interval);
-  }, [endTime, startTimer]);
+  }, [endTime, isTracking]);
 
-  const calculateHoursToStopTracking = (hours: number) => {
+  const calculateHoursToStopTracking = async (hours: number) => {
     const hoursToAdd = 1000 * 60 * 60 * hours;
     const stopTime = new Date(new Date().getTime() + hoursToAdd);
+    // We save the Shutdown time to local storage for auto
+    // Shutdown of LocationService
+    try {
+      //Store new value, it should overwrite the old value
+      await AsyncStorage.setItem(
+        'shutDownTime',
+        JSON.stringify(Date.parse(stopTime.toISOString()))
+      );
+    } catch (e) {
+      console.log('Failed to store shutDownTime');
+      //Service will not shut down automatically!
+      //Do proper error handling
+    }
+
     let StopTimeFormatted = stopTime.toLocaleString([], {
       hour12: false,
     });

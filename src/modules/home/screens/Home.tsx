@@ -36,6 +36,7 @@ export const HomeScreen: FC = () => {
   const [hoursToTrack, setHoursToTrack] = useState(8);
   const [isTracking, setIsTracking] = useState(false);
   const [showDevInfoModal, setShowDevInfoModal] = useState(false);
+  const [isChangingServiceStatus, setIsChangingServiceStatus] = useState(false);
 
   //Hooks
   const { currentStopTrackingTime, timeLeft } = useGetTrackingTimeText(
@@ -43,8 +44,19 @@ export const HomeScreen: FC = () => {
     isTracking
   );
 
-  const { EventTask, isServiceCalled, location, apiCallStatus, userZones } =
-    useEventTask();
+  const {
+    EventTask,
+    isServiceCalled,
+    isServiceClosed,
+    location,
+    apiCallStatus,
+    userZones,
+  } = useEventTask();
+
+  //Use Effects
+  useEffect(() => {
+    checkStatusAsync();
+  }, []);
 
   useEffect(() => {
     if (userLocation) {
@@ -52,13 +64,16 @@ export const HomeScreen: FC = () => {
     }
   }, [userLocation]);
 
-  const toggleForegroundService = async () => {
+  //Functions
+  const toggleLocationService = async () => {
     if (isTracking) {
+      setIsChangingServiceStatus(true);
       setIsTracking(false);
       stopBackgroundUpdate();
       logout();
     } else {
       await AsyncStorage.removeItem('zonesToSend');
+      setIsChangingServiceStatus(true);
       setIsTracking(true);
       startBackgroundUpdate();
       setShowDevInfoModal(true);
@@ -66,10 +81,6 @@ export const HomeScreen: FC = () => {
 
     checkStatusAsync();
   };
-
-  React.useEffect(() => {
-    checkStatusAsync();
-  }, []);
 
   const checkStatusAsync = async () => {
     const status = await BackgroundFetch.getStatusAsync();
@@ -81,6 +92,7 @@ export const HomeScreen: FC = () => {
       BackgroundFetch.BackgroundFetchStatus[status],
       isRegistered
     );
+    setIsChangingServiceStatus(false);
   };
 
   return (
@@ -112,8 +124,10 @@ export const HomeScreen: FC = () => {
           title={isTracking ? 'Stoppa körning' : 'Starta körning'}
           type="primary"
           onPress={() => {
-            toggleForegroundService();
+            toggleLocationService();
           }}
+          disabled={isChangingServiceStatus}
+          isLoading={isChangingServiceStatus}
         />
       </Wrapper>
       {/* Remove modal after testing with Peter */}
@@ -123,7 +137,13 @@ export const HomeScreen: FC = () => {
           <StyledServiceContainer>
             <StyledHeader>Service Status:</StyledHeader>
             <StyledServiceText>
-              {isServiceCalled ? 'Running' : 'Waiting'}
+              {isServiceClosed ? (
+                <StyledServiceTextRed>Shutdown</StyledServiceTextRed>
+              ) : isServiceCalled ? (
+                'Running'
+              ) : (
+                'Waiting'
+              )}
             </StyledServiceText>
           </StyledServiceContainer>
           <StyledUserLocationContainer>
@@ -243,6 +263,10 @@ const StyledBody = styled(Body)``;
 
 const StyledServiceText = styled(Body)`
   color: green;
+`;
+
+const StyledServiceTextRed = styled(Body)`
+  color: red;
 `;
 const StyledApiText = styled(Body)``;
 

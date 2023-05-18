@@ -18,7 +18,7 @@ export const useGetOrganisations: Hook = ({ onError }) => {
     data: organisationsList,
   } = useQuery({
     queryKey: ['getOrganisations'],
-    queryFn: () => api.getOrganiztions(),
+    queryFn: () => api.getOrganisations(),
   });
 
   if (isError) onError?.();

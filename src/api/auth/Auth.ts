@@ -39,7 +39,7 @@ export const login = (request: LoginRequest) => {
   // return data;
 };
 
-export const getOrganiztions = () => {
+export const getOrganisations = () => {
   return new Promise((resolve, reject) => {
     const url = BASE_URL + '/organisations';
 

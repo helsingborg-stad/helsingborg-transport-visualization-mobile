@@ -9,9 +9,11 @@ import { useGetAllZones } from '@src/modules/home/hooks/useGetAllZones';
 import { ZoneFeature } from '../types';
 import { LocationObjectCoords } from 'expo-location';
 import { EventRequestType } from '@src/api/types';
+import { stopBackgroundUpdate } from '../services/BackgroundLocationService';
 
 export function useEventTask() {
   const [isServiceCalled, setIsServiceCalled] = useState(false);
+  const [isServiceClosed, setIsServiceClosed] = useState(false);
   const [location, setLocation] = useState(null);
   const [apiCallStatus, setApiCallStatus] = useState<string>('');
   const [userZones, setUserZones] = useState<ZoneFeature[]>(null);
@@ -48,6 +50,26 @@ export function useEventTask() {
   };
 
   const EventTask = async (location: LocationObjectCoords) => {
+    // Check if the service should be stopped
+    // Depending on the Closing timer set by Slider
+    try {
+      const shutDownTimeStr = await AsyncStorage.getItem('shutDownTime');
+      if (shutDownTimeStr && shutDownTimeStr.length > 0) {
+        const shutDownTime = parseInt(shutDownTimeStr);
+        const currentTime = Date.now();
+        if (currentTime > shutDownTime) {
+          //We Shut down the tracking!
+          await stopBackgroundUpdate();
+          setIsServiceClosed(true);
+          setIsServiceCalled(false);
+          setApiCallStatus('Inactive');
+        }
+      }
+    } catch (e) {
+      console.log('Failed to read zonesToSend');
+    }
+    // return;
+
     // if zones or location is not available then we cannot do anything
     // just return
     if (!zones || !location) {
@@ -148,7 +170,6 @@ export function useEventTask() {
 
       Promise.all(promises)
         .then(async (results) => {
-          console.log('All done', results);
           setApiCallStatus(
             'Event stored successfully (' + results.length + ')'
           );
@@ -233,5 +254,12 @@ export function useEventTask() {
     }
   };
 
-  return { EventTask, isServiceCalled, location, apiCallStatus, userZones };
+  return {
+    EventTask,
+    isServiceCalled,
+    isServiceClosed,
+    location,
+    apiCallStatus,
+    userZones,
+  };
 }

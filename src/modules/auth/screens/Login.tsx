@@ -20,7 +20,7 @@ import {
 } from '@src/components';
 import { PinCodeInput } from '../components/PinCodeInput';
 import { useTheme } from 'styled-components';
-import { getOrganiztions, login } from '@src/api/auth';
+import { getOrganisations, login } from '@src/api/auth';
 import { OrganisationResponse, LoginResponse } from '@src/api/types';
 import { useAuthContext } from '@src/context/auth/AuthState';
 import { User } from '@src/context/auth/AuthTypes';
@@ -48,7 +48,7 @@ export const LoginScreen: FC = () => {
 
   //Fetch organisations on Load
   useEffect(() => {
-    getOrganiztions()
+    getOrganisations()
       .then((data: OrganisationResponse[]) => {
         const tmpList = data.map((org) => org.name);
         setOrganiazations(tmpList);
@@ -202,7 +202,7 @@ export const LoginScreen: FC = () => {
             title={'Starta körning'}
             onPress={handlePinSubmit}
             type="primary"
-            disabled={isLoggingIn}
+            disabled={isLoggingIn || isLoadingOrgs}
             isLoading={isLoggingIn}
           />
         )}
