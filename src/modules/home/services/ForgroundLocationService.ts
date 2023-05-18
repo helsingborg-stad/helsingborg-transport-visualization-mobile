@@ -1,4 +1,4 @@
-import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Constants';
+import { LOCATION_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Constants';
 import * as Location from 'expo-location';
 let foregroundSubscription = null;
 
@@ -18,7 +18,7 @@ export const startForegroundUpdate = async (callback) => {
     {
       // For better logs, we set the accuracy to the most sensitive option
       accuracy: Location.Accuracy.High,
-      timeInterval: FOREGROUND_SERVICE_CALL_INTERVAL_TIME,
+      timeInterval: LOCATION_SERVICE_CALL_INTERVAL_TIME,
       distanceInterval: 0,
     },
     (location) => {

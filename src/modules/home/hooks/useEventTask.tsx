@@ -3,7 +3,7 @@ import { postEvent } from '@src/api/zone';
 import * as turf from '@turf/turf';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
-import { FOREGROUND_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Constants';
+import { LOCATION_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Constants';
 import { User } from '@src/context/auth/AuthTypes';
 import { useGetAllZones } from '@src/modules/home/hooks/useGetAllZones';
 import { ZoneFeature } from '../types';
@@ -68,7 +68,6 @@ export function useEventTask() {
     } catch (e) {
       console.log('Failed to read zonesToSend');
     }
-    // return;
 
     // if zones or location is not available then we cannot do anything
     // just return
@@ -81,7 +80,7 @@ export function useEventTask() {
     if (serviceTimeRef.current) {
       const currTime = Date.now();
       const timeElapsed = currTime - serviceTimeRef.current;
-      if (timeElapsed < FOREGROUND_SERVICE_CALL_INTERVAL_TIME) {
+      if (timeElapsed < LOCATION_SERVICE_CALL_INTERVAL_TIME) {
         console.log('Called Too Soon!');
         return;
       }
@@ -98,8 +97,8 @@ export function useEventTask() {
     setLocation(location);
     //END REMOVE
 
-    const pt = turf.point([12.730018737, 56.025278798]);
-    // const pt = turf.point([location.latitude, location.longitude]);
+    // const pt = turf.point([12.730018737, 56.025278798]);
+    const pt = turf.point([location.latitude, location.longitude]);
 
     //Check the local storage and see if there are any zones
     let zonesToSend: ZoneFeature[] = [];
@@ -123,14 +122,14 @@ export function useEventTask() {
       }
 
       let distributionZoneId = null;
-      const newPt = turf.point([100.730018737, 100.025278798]);
+      // const newPt = turf.point([100.730018737, 100.025278798]);
 
       const promises: Promise<string>[] = [];
       //Check if type distribution is in Local storage
       const distributionId = await SecureStore.getItemAsync('distributionId');
       zonesToSend.forEach(async (zone) => {
         const poly = zone;
-        const isInsideZone = turf.booleanPointInPolygon(newPt, poly);
+        const isInsideZone = turf.booleanPointInPolygon(pt, poly);
 
         if (!isInsideZone) {
           if (
