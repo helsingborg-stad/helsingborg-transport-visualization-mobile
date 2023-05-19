@@ -9,11 +9,12 @@ import { useGetAllZones } from '@src/modules/home/hooks/useGetAllZones';
 import { ZoneFeature } from '../types';
 import { LocationObjectCoords } from 'expo-location';
 import { EventRequestType } from '@src/api/types';
-import { stopBackgroundUpdate } from '../services/BackgroundLocationService';
+// import { stopBackgroundUpdate } from '../services/BackgroundLocationService';
 
 export function useEventTask() {
   const [isServiceCalled, setIsServiceCalled] = useState(false);
-  const [isServiceClosed, setIsServiceClosed] = useState(false);
+  // const [isServiceClosed, setIsServiceClosed] = useState(false);
+  const [isServiceClosed] = useState(false);
   const [location, setLocation] = useState(null);
   const [apiCallStatus, setApiCallStatus] = useState<string>('');
   const [userZones, setUserZones] = useState<ZoneFeature[]>(null);
@@ -49,24 +50,24 @@ export function useEventTask() {
     });
   };
 
-  const shouldShutdownService = async () => {
-    try {
-      const shutDownTimeStr = await AsyncStorage.getItem('shutDownTime');
-      if (shutDownTimeStr && shutDownTimeStr.length > 0) {
-        const shutDownTime = parseInt(shutDownTimeStr);
-        const currentTime = Date.now();
-        if (currentTime > shutDownTime) {
-          //We Shut down the tracking!
-          await stopBackgroundUpdate();
-          setIsServiceClosed(true);
-          setIsServiceCalled(false);
-          setApiCallStatus('Inactive');
-        }
-      }
-    } catch (e) {
-      console.log('Failed to read shutDownTime');
-    }
-  };
+  // const shouldShutdownService = async () => {
+  //   try {
+  //     const shutDownTimeStr = await AsyncStorage.getItem('shutDownTime');
+  //     if (shutDownTimeStr && shutDownTimeStr.length > 0) {
+  //       const shutDownTime = parseInt(shutDownTimeStr);
+  //       const currentTime = Date.now();
+  //       if (currentTime > shutDownTime) {
+  //         //We Shut down the tracking!
+  //         await stopBackgroundUpdate();
+  //         setIsServiceClosed(true);
+  //         setIsServiceCalled(false);
+  //         setApiCallStatus('Inactive');
+  //       }
+  //     }
+  //   } catch (e) {
+  //     console.log('Failed to read shutDownTime');
+  //   }
+  // };
 
   const EventTask = async (location: LocationObjectCoords) => {
     // if zones or location is not available then we cannot do anything
@@ -264,7 +265,7 @@ export function useEventTask() {
 
     // Check if the service should be stopped
     // Depending on the Closing timer set by Slider
-    await shouldShutdownService();
+    // await shouldShutdownService();
   };
 
   return {
