@@ -97,8 +97,8 @@ export function useEventTask() {
     setLocation(location);
     //END REMOVE
 
-    // const pt = turf.point([12.730018737, 56.025278798]);
-    const pt = turf.point([location.latitude, location.longitude]);
+    // const pt = turf.point([12.71082389009386, 56.02472395407644]);
+    const pt = turf.point([location.longitude, location.latitude]);
 
     //Check the local storage and see if there are any zones
     let zonesToSend: ZoneFeature[] = [];
