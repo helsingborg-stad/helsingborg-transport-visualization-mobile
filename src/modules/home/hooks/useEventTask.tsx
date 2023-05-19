@@ -126,7 +126,13 @@ export function useEventTask() {
 
       const promises: Promise<string>[] = [];
       //Check if type distribution is in Local storage
-      const distributionId = await SecureStore.getItemAsync('distributionId');
+      let distributionObject = null;
+      try {
+        const jsonValue = await AsyncStorage.getItem('distributionId');
+        distributionObject = jsonValue != null ? JSON.parse(jsonValue) : null;
+      } catch (e) {
+        console.log('Failed to read zonesToSend');
+      }
       zonesToSend.forEach(async (zone) => {
         const poly = zone;
         const isInsideZone = turf.booleanPointInPolygon(pt, poly);
@@ -137,13 +143,17 @@ export function useEventTask() {
             zone.properties.type.toLowerCase() === 'distribution'
           ) {
             distributionZoneId = zone.properties.id;
-            SecureStore.setItemAsync(
-              'distributionId',
-              JSON.stringify(zone.properties.id)
-            );
+            try {
+              await AsyncStorage.setItem(
+                'distributionId',
+                JSON.stringify({ distributionZoneId: zone.properties.id })
+              );
+            } catch (e) {
+              console.log('Failed to save distributionId in LocalStorage');
+            }
           } else {
-            if (distributionId) {
-              distributionZoneId = distributionId;
+            if (distributionObject && distributionObject.distributionZoneId) {
+              distributionZoneId = distributionObject.distributionZoneId;
             }
           }
           const formattedZone = {
