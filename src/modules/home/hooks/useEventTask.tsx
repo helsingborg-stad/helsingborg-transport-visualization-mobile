@@ -49,9 +49,7 @@ export function useEventTask() {
     });
   };
 
-  const EventTask = async (location: LocationObjectCoords) => {
-    // Check if the service should be stopped
-    // Depending on the Closing timer set by Slider
+  const shouldShutdownService = async () => {
     try {
       const shutDownTimeStr = await AsyncStorage.getItem('shutDownTime');
       if (shutDownTimeStr && shutDownTimeStr.length > 0) {
@@ -66,9 +64,11 @@ export function useEventTask() {
         }
       }
     } catch (e) {
-      console.log('Failed to read zonesToSend');
+      console.log('Failed to read shutDownTime');
     }
+  };
 
+  const EventTask = async (location: LocationObjectCoords) => {
     // if zones or location is not available then we cannot do anything
     // just return
     if (!zones || !location) {
@@ -261,6 +261,10 @@ export function useEventTask() {
         console.log('Failed to save zonesToSend in LocalStorage');
       }
     }
+
+    // Check if the service should be stopped
+    // Depending on the Closing timer set by Slider
+    await shouldShutdownService();
   };
 
   return {

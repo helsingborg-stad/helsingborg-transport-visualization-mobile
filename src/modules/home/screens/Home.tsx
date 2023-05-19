@@ -20,6 +20,7 @@ import * as BackgroundFetch from 'expo-background-fetch';
 import * as TaskManager from 'expo-task-manager';
 import { LOCATION_TASK_NAME } from '@src/utils/Constants';
 import { userLocation } from '@src/taskManager/TaskManager';
+import { serviceStatus } from '../services/BackgroundLocationService';
 import {
   stopBackgroundUpdate,
   startBackgroundUpdate,
@@ -64,18 +65,22 @@ export const HomeScreen: FC = () => {
     }
   }, [userLocation]);
 
+  useEffect(() => {
+    if (serviceStatus) {
+      setIsTracking(serviceStatus);
+    }
+  }, [serviceStatus]);
+
   //Functions
   const toggleLocationService = async () => {
     if (isTracking) {
+      await stopBackgroundUpdate();
       setIsChangingServiceStatus(true);
-      setIsTracking(false);
-      stopBackgroundUpdate();
       logout();
     } else {
       await AsyncStorage.removeItem('zonesToSend');
+      await startBackgroundUpdate();
       setIsChangingServiceStatus(true);
-      setIsTracking(true);
-      startBackgroundUpdate();
       setShowDevInfoModal(true);
     }
 

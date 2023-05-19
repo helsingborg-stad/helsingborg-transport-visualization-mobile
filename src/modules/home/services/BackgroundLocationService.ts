@@ -3,6 +3,11 @@ import * as TaskManager from 'expo-task-manager';
 import { LOCATION_TASK_NAME } from '@src/utils/Constants';
 import { LOCATION_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Constants';
 
+// This global variable is used to share information between
+// Task manager and Components
+// For now it just sends User location coords
+export let serviceStatus = false;
+
 // Start location tracking in background
 export const startBackgroundUpdate = async () => {
   // Don't track position if permission is not granted
@@ -41,6 +46,7 @@ export const startBackgroundUpdate = async () => {
       notificationColor: '#fff',
     },
   });
+  serviceStatus = true;
 };
 
 // Stop location tracking in background
@@ -50,6 +56,7 @@ export const stopBackgroundUpdate = async () => {
   );
   if (hasStarted) {
     await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+    serviceStatus = false;
     console.log('Location tacking stopped');
   }
 };
