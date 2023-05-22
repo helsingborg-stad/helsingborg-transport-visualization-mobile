@@ -20,7 +20,10 @@ import { useAuthContext } from '@src/context/auth';
 import { useGetTrackingTimeText } from '../hooks/useGetTrackingTimeText';
 import * as BackgroundFetch from 'expo-background-fetch';
 import * as TaskManager from 'expo-task-manager';
-import { LOCATION_TASK_NAME } from '@src/utils/Constants';
+import {
+  LOCATION_SERVICE_CALL_INTERVAL_TIME,
+  LOCATION_TASK_NAME,
+} from '@src/utils/Constants';
 import { userLocation } from '@src/taskManager/TaskManager';
 import { serviceStatus } from '../services/BackgroundLocationService';
 import {
@@ -171,7 +174,11 @@ export const HomeScreen: FC = () => {
       <StyledModal visible={showDevInfoModal}>
         <ModalBackDrop onPress={() => setShowDevInfoModal(false)} />
         <StyledModalChildContainer>
-          <StyledOldState>{counter}</StyledOldState>
+          <StyledOldState>
+            {'Service time: '}
+            {LOCATION_SERVICE_CALL_INTERVAL_TIME / 1000}
+            {' sec '} - {' ' + counter + ' s'}
+          </StyledOldState>
           <StyledOldState>{oldStateDeleted}</StyledOldState>
 
           <StyledServiceContainer>
