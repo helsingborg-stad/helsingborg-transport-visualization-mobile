@@ -39,6 +39,7 @@ export const HomeScreen: FC = () => {
   const [isTracking, setIsTracking] = useState(false);
   const [showDevInfoModal, setShowDevInfoModal] = useState(false);
   const [isChangingServiceStatus, setIsChangingServiceStatus] = useState(false);
+  const [oldStateDeleted, setOldStateDeleted] = useState('');
 
   //Hooks
   const { currentStopTrackingTime, timeLeft } = useGetTrackingTimeText(
@@ -83,7 +84,13 @@ export const HomeScreen: FC = () => {
       logout();
     } else {
       //we reset the local state every time we start the service
-      await AsyncStorage.removeItem('zonesToSend');
+      try {
+        await AsyncStorage.removeItem('zonesToSend');
+        setOldStateDeleted('Old state deleted when starting the service');
+      } catch (error) {
+        setOldStateDeleted('Failed to delete old state ' + error);
+      }
+
       await startBackgroundUpdate();
       setIsChangingServiceStatus(true);
       setShowDevInfoModal(true);
@@ -144,6 +151,8 @@ export const HomeScreen: FC = () => {
       <StyledModal visible={showDevInfoModal}>
         <ModalBackDrop onPress={() => setShowDevInfoModal(false)} />
         <StyledModalChildContainer>
+          <StyledOldState>{oldStateDeleted}</StyledOldState>
+
           <StyledServiceContainer>
             <StyledHeader>Service Status:</StyledHeader>
             <StyledServiceText>
@@ -289,6 +298,10 @@ const StyledHeader = styled(SubTitle)`
   font-weight: 900;
 `;
 const StyledBody = styled(Body)``;
+
+const StyledOldState = styled(Body)`
+  margin: 10px;
+`;
 
 const StyledServiceText = styled(Body)`
   color: green;
