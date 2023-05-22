@@ -35,7 +35,7 @@ export const startBackgroundUpdate = async () => {
   console.log('starting the task');
   await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
     // For better logs, we set the accuracy to the most sensitive option
-    accuracy: Location.Accuracy.High,
+    accuracy: Location.Accuracy.Highest,
     timeInterval: LOCATION_SERVICE_CALL_INTERVAL_TIME,
     distanceInterval: 0,
     // Make sure to enable this notification if you want to consistently track in the background
