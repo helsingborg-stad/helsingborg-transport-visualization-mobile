@@ -17,6 +17,11 @@ export function useEventTask() {
   const [location, setLocation] = useState(null);
   const [apiCallStatus, setApiCallStatus] = useState<string>('');
   const [userZones, setUserZones] = useState<ZoneFeature[]>(null);
+  //
+  const [distributionZone, setDistributionZone] = useState(null);
+  const [isInsideDistributionZone, setIsInsideDistributionZone] =
+    useState(false);
+  //
   const serviceTimeRef = useRef(null);
 
   //Get All getAllZones
@@ -117,7 +122,7 @@ export function useEventTask() {
     setLocation(location);
     //END REMOVE
 
-    // const pt = turf.point([12.71082389009386, 56.02472395407644]);
+    // const pt = turf.point([24.688818841, 59.408275184]);
     const pt = turf.point([location.longitude, location.latitude]);
 
     //Check the local storage and see if there are any zones
@@ -151,6 +156,8 @@ export function useEventTask() {
             zone.properties.type.toLowerCase() === 'distribution'
           ) {
             distributionZoneId = zone.properties.id;
+            setIsInsideDistributionZone(true);
+            setDistributionZone(zone);
             await writeToAsyncStorage(
               'distributionId',
               JSON.stringify({ distributionZoneId: zone.properties.id })
@@ -191,6 +198,7 @@ export function useEventTask() {
           const filteredZones = zonesToSend.filter(
             (z) => !results.includes(z.properties.id)
           );
+
           if (filteredZones.length < 1) {
             //delete the zonesToSend local storage
             await AsyncStorage.removeItem('zonesToSend');
@@ -199,6 +207,10 @@ export function useEventTask() {
             setZoneNamesForUser([]);
             //END REMOVE
           } else {
+            const tmpDistID =
+              distributionZone && distributionZone.properties.id;
+            const tmpIsInsideDistZone = results.includes(tmpDistID);
+            setIsInsideDistributionZone(!tmpIsInsideDistZone);
             await writeToAsyncStorage(
               'zonesToSend',
               JSON.stringify(filteredZones)
@@ -229,6 +241,10 @@ export function useEventTask() {
           timeZone: 'UTC',
           hour12: false,
         });
+        if (zone.properties.type.toLowerCase() === 'distribution') {
+          setDistributionZone(zone);
+          setIsInsideDistributionZone(true);
+        }
         tmpUserZones = [...tmpUserZones, zone];
       }
     });
@@ -262,5 +278,7 @@ export function useEventTask() {
     location,
     apiCallStatus,
     userZones,
+    distributionZone,
+    isInsideDistributionZone,
   };
 }

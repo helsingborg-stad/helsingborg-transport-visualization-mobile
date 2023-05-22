@@ -9,7 +9,6 @@ export let userLocation: LocationObjectCoords = null;
 
 // Define the background task for location tracking
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
-  console.log('Task called');
   if (error) {
     console.error(error);
     return;

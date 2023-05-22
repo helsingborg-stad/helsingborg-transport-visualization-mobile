@@ -64,6 +64,7 @@ export const postEvent = (id: string, request: EventRequestType) => {
         resolve(res);
       })
       .catch(function (error) {
+        console.log('-------->ERROR', error);
         reject(error);
       });
   });

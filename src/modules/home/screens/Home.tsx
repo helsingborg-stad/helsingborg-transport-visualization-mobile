@@ -10,6 +10,7 @@ import {
   ModalChildContainer,
   ModalBackDrop,
 } from '@src/components';
+
 import Slider from '@react-native-community/slider';
 import { useTheme } from 'styled-components';
 import { Platform } from 'react-native';
@@ -52,9 +53,11 @@ export const HomeScreen: FC = () => {
     location,
     apiCallStatus,
     userZones,
+    distributionZone,
+    isInsideDistributionZone,
   } = useEventTask();
 
-  //Use Effects
+  // Use Effects
   useEffect(() => {
     checkStatusAsync();
     toggleLocationService();
@@ -158,6 +161,25 @@ export const HomeScreen: FC = () => {
             <StyledApiText>
               {apiCallStatus.length > 1 ? apiCallStatus : 'Waiting'}
             </StyledApiText>
+          </StyledUserLocationContainer>
+
+          <StyledUserLocationContainer>
+            <StyledHeader>Is Distribution Zone:</StyledHeader>
+
+            <StyledBody>
+              {isInsideDistributionZone
+                ? 'Inside a distribution'
+                : 'Not inside a distribution zone'}
+            </StyledBody>
+
+            {distributionZone && (
+              <StyledBody>
+                Name:{' '}
+                {distributionZone
+                  ? distributionZone.properties.name
+                  : 'cannot get the name of zone'}
+              </StyledBody>
+            )}
           </StyledUserLocationContainer>
 
           <StyledUserLocationContainer>
