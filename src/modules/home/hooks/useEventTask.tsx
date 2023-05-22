@@ -155,7 +155,7 @@ export function useEventTask() {
             zone.properties.type &&
             zone.properties.type.toLowerCase() === 'distribution'
           ) {
-            distributionZoneId = zone.properties.id;
+            distributionZoneId = null;
             setIsInsideDistributionZone(true);
             setDistributionZone(zone);
             await writeToAsyncStorage(
@@ -255,8 +255,8 @@ export function useEventTask() {
         const tmpZone = zonesToSend.filter(
           (z) => z.properties.id === zone.properties.id
         );
-        if (!tmpZone) {
-          zonesToSend.push(zone);
+        if (tmpZone.length > 0) {
+          zonesToSend.push(zone[0]);
         }
       });
       await writeToAsyncStorage('zonesToSend', JSON.stringify(zonesToSend));
