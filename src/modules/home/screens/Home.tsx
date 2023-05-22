@@ -57,6 +57,7 @@ export const HomeScreen: FC = () => {
   //Use Effects
   useEffect(() => {
     checkStatusAsync();
+    toggleLocationService();
   }, []);
 
   useEffect(() => {
@@ -78,6 +79,7 @@ export const HomeScreen: FC = () => {
       setIsChangingServiceStatus(true);
       logout();
     } else {
+      //we reset the local state every time we start the service
       await AsyncStorage.removeItem('zonesToSend');
       await startBackgroundUpdate();
       setIsChangingServiceStatus(true);

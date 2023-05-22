@@ -88,10 +88,10 @@ export function useEventTask() {
     }
   };
 
-  const checkIfServiceShouldRun = (prerequisites: boolean) => {
+  const EventTask = async (location: LocationObjectCoords) => {
     // if zones or location is not available then we cannot do anything
     // just return
-    if (!prerequisites) {
+    if (!zones || !location) {
       console.log('zones or location not ready yet');
       return;
     }
@@ -107,10 +107,6 @@ export function useEventTask() {
     }
 
     serviceTimeRef.current = Date.now();
-  };
-
-  const EventTask = async (location: LocationObjectCoords) => {
-    checkIfServiceShouldRun(!zones || !location);
 
     //Dev only - Remove after Petter test the app
     setIsServiceCalled(true);
