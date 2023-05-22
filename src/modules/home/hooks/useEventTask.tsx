@@ -169,7 +169,7 @@ export function useEventTask() {
           }
           const formattedZone = {
             trackingId: trackingId ?? '',
-            distributionZoneId: distributionZoneId,
+            distributionZoneId: distributionZoneId ?? null,
             enteredAt: zone.properties.enteredAtTime,
             exitedAt: new Date().toLocaleString('sv-SE', {
               timeZone: 'UTC',

@@ -86,7 +86,8 @@ export const HomeScreen: FC = () => {
       //we reset the local state every time we start the service
       try {
         await AsyncStorage.removeItem('zonesToSend');
-        setOldStateDeleted('Old state deleted when starting the service');
+        await AsyncStorage.removeItem('distributionId');
+        setOldStateDeleted('Old state deleted when start the service');
       } catch (error) {
         setOldStateDeleted('Failed to delete old state ' + error);
       }
