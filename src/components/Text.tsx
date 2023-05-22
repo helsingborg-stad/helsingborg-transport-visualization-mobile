@@ -65,3 +65,10 @@ export const ButtonText = styled(Text)`
 export const OutlinedButtonText = styled(ButtonText)`
   color: ${({ theme }) => theme.colors.primary.main};
 `;
+
+export const Code = styled(Text)`
+  font-family: ${({ theme }) => theme.fonts.secondary.light};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  line-height: ${({ theme }) => theme.lineHeights.xs};
+  letter-spacing: ${({ theme }) => theme.letterSpaces.no};
+`;

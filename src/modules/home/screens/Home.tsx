@@ -9,6 +9,7 @@ import {
   Modal,
   ModalChildContainer,
   ModalBackDrop,
+  Code,
 } from '@src/components';
 
 import Slider from '@react-native-community/slider';
@@ -57,6 +58,7 @@ export const HomeScreen: FC = () => {
     userZones,
     distributionZone,
     isInsideDistributionZone,
+    detailEventLog,
   } = useEventTask();
 
   // Use Effects
@@ -221,6 +223,14 @@ export const HomeScreen: FC = () => {
             <StyledHeader>Zones:</StyledHeader>
             {userZones && <StyledBody>{JSON.stringify(userZones)}</StyledBody>}
           </StyledUserZonesContainer>
+          <StyledScrollView>
+            {detailEventLog.map((event, index) => (
+              <StyledCode key={index}>
+                {'• '}
+                {event}
+              </StyledCode>
+            ))}
+          </StyledScrollView>
         </StyledModalChildContainer>
       </StyledModal>
     </StyledScreen>
@@ -316,6 +326,8 @@ const StyledHeader = styled(SubTitle)`
 `;
 const StyledBody = styled(Body)``;
 
+const StyledCode = styled(Code)``;
+
 const StyledOldState = styled(Body)`
   margin: 10px;
 `;
@@ -330,11 +342,23 @@ const StyledServiceTextRed = styled(Body)`
 const StyledApiText = styled(Body)``;
 
 //
-const StyledModal = styled(Modal)`
-  width: 50%;
-`;
+const StyledModal = styled(Modal)``;
 
 const StyledModalChildContainer = styled(ModalChildContainer)`
   padding: 20px;
   width: 100%;
+`;
+
+const StyledScrollView = styled.ScrollView.attrs(() => ({
+  contentContainerStyle: {
+    paddingVertical: 22,
+    paddingHorizontal: 22,
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+  },
+}))`
+  width: 100%;
+  height: 200px;
+  background-color: papayawhip;
+  border-radius: 10px;
 `;
