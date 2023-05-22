@@ -9,12 +9,11 @@ import { useGetAllZones } from '@src/modules/home/hooks/useGetAllZones';
 import { ZoneFeature } from '../types';
 import { LocationObjectCoords } from 'expo-location';
 import { EventRequestType } from '@src/api/types';
-// import { stopBackgroundUpdate } from '../services/BackgroundLocationService';
+import { stopBackgroundUpdate } from '../services/BackgroundLocationService';
 
 export function useEventTask() {
   const [isServiceCalled, setIsServiceCalled] = useState(false);
-  // const [isServiceClosed, setIsServiceClosed] = useState(false);
-  const [isServiceClosed] = useState(false);
+  const [isServiceClosed, setIsServiceClosed] = useState(false);
   const [location, setLocation] = useState(null);
   const [apiCallStatus, setApiCallStatus] = useState<string>('');
   const [userZones, setUserZones] = useState<ZoneFeature[]>(null);
@@ -50,29 +49,49 @@ export function useEventTask() {
     });
   };
 
-  // const shouldShutdownService = async () => {
-  //   try {
-  //     const shutDownTimeStr = await AsyncStorage.getItem('shutDownTime');
-  //     if (shutDownTimeStr && shutDownTimeStr.length > 0) {
-  //       const shutDownTime = parseInt(shutDownTimeStr);
-  //       const currentTime = Date.now();
-  //       if (currentTime > shutDownTime) {
-  //         //We Shut down the tracking!
-  //         await stopBackgroundUpdate();
-  //         setIsServiceClosed(true);
-  //         setIsServiceCalled(false);
-  //         setApiCallStatus('Inactive');
-  //       }
-  //     }
-  //   } catch (e) {
-  //     console.log('Failed to read shutDownTime');
-  //   }
-  // };
+  const shouldShutdownService = async () => {
+    try {
+      const shutDownTimeStr = await AsyncStorage.getItem('shutDownTime');
+      if (shutDownTimeStr && shutDownTimeStr.length > 0) {
+        const shutDownTime = parseInt(shutDownTimeStr);
+        const currentTime = Date.now();
+        if (currentTime > shutDownTime) {
+          //We Shut down the tracking!
+          await stopBackgroundUpdate();
+          setIsServiceClosed(true);
+          setIsServiceCalled(false);
+          setApiCallStatus('Inactive');
+        }
+      }
+    } catch (e) {
+      console.log('Failed to read shutDownTime');
+    }
+  };
 
-  const EventTask = async (location: LocationObjectCoords) => {
+  const readFromAsyncStorage = async (key: string) => {
+    try {
+      let jsonObject = null;
+      const jsonValue = await AsyncStorage.getItem(key);
+      jsonObject = jsonValue != null ? JSON.parse(jsonValue) : null;
+      return jsonObject;
+    } catch (e) {
+      console.log('Failed to read ' + key);
+      return null;
+    }
+  };
+
+  const writeToAsyncStorage = async (key: string, value: string) => {
+    try {
+      await AsyncStorage.setItem(key, value);
+    } catch (e) {
+      console.log('Failed to save ' + key + ' in LocalStorage');
+    }
+  };
+
+  const checkIfServiceShouldRun = (prerequisites: boolean) => {
     // if zones or location is not available then we cannot do anything
     // just return
-    if (!zones || !location) {
+    if (!prerequisites) {
       console.log('zones or location not ready yet');
       return;
     }
@@ -88,6 +107,10 @@ export function useEventTask() {
     }
 
     serviceTimeRef.current = Date.now();
+  };
+
+  const EventTask = async (location: LocationObjectCoords) => {
+    checkIfServiceShouldRun(!zones || !location);
 
     //Dev only - Remove after Petter test the app
     setIsServiceCalled(true);
@@ -102,14 +125,7 @@ export function useEventTask() {
     const pt = turf.point([location.longitude, location.latitude]);
 
     //Check the local storage and see if there are any zones
-    let zonesToSend: ZoneFeature[] = [];
-
-    try {
-      const jsonValue = await AsyncStorage.getItem('zonesToSend');
-      zonesToSend = jsonValue != null ? JSON.parse(jsonValue) : null;
-    } catch (e) {
-      console.log('Failed to read zonesToSend');
-    }
+    let zonesToSend: ZoneFeature[] = await readFromAsyncStorage('zonesToSend');
 
     if (zonesToSend) {
       //Get Tracking ID
@@ -127,13 +143,8 @@ export function useEventTask() {
 
       const promises: Promise<string>[] = [];
       //Check if type distribution is in Local storage
-      let distributionObject = null;
-      try {
-        const jsonValue = await AsyncStorage.getItem('distributionId');
-        distributionObject = jsonValue != null ? JSON.parse(jsonValue) : null;
-      } catch (e) {
-        console.log('Failed to read zonesToSend');
-      }
+      const distributionObject = await readFromAsyncStorage('distributionId');
+
       zonesToSend.forEach(async (zone) => {
         const poly = zone;
         const isInsideZone = turf.booleanPointInPolygon(pt, poly);
@@ -144,21 +155,17 @@ export function useEventTask() {
             zone.properties.type.toLowerCase() === 'distribution'
           ) {
             distributionZoneId = zone.properties.id;
-            try {
-              await AsyncStorage.setItem(
-                'distributionId',
-                JSON.stringify({ distributionZoneId: zone.properties.id })
-              );
-            } catch (e) {
-              console.log('Failed to save distributionId in LocalStorage');
-            }
+            await writeToAsyncStorage(
+              'distributionId',
+              JSON.stringify({ distributionZoneId: zone.properties.id })
+            );
           } else {
             if (distributionObject && distributionObject.distributionZoneId) {
               distributionZoneId = distributionObject.distributionZoneId;
             }
           }
           const formattedZone = {
-            trackingId: trackingId,
+            trackingId: trackingId ?? '',
             distributionZoneId: distributionZoneId,
             enteredAt: zone.properties.enteredAtTime,
             exitedAt: new Date().toLocaleString('sv-SE', {
@@ -183,6 +190,7 @@ export function useEventTask() {
           setApiCallStatus(
             'Event stored successfully (' + results.length + ')'
           );
+
           //Now remove the zones from the zonesToSend
           const filteredZones = zonesToSend.filter(
             (z) => !results.includes(z.properties.id)
@@ -195,14 +203,10 @@ export function useEventTask() {
             setZoneNamesForUser([]);
             //END REMOVE
           } else {
-            try {
-              await AsyncStorage.setItem(
-                'zonesToSend',
-                JSON.stringify(filteredZones)
-              );
-            } catch (e) {
-              console.log('Failed to save zonesToSend in LocalStorage');
-            }
+            await writeToAsyncStorage(
+              'zonesToSend',
+              JSON.stringify(filteredZones)
+            );
             //Dev only - Remove after Petter test the app
             setZoneNamesForUser(filteredZones);
             //END REMOVE
@@ -217,7 +221,7 @@ export function useEventTask() {
         setApiCallStatus('');
       }, 3000);
     }
-    // return;
+
     //After its done -> just move on as normal flow
     const features = zones.features;
     let tmpUserZones: ZoneFeature[] = [];
@@ -243,29 +247,16 @@ export function useEventTask() {
           zonesToSend.push(zone);
         }
       });
-
-      try {
-        await AsyncStorage.setItem('zonesToSend', JSON.stringify(zonesToSend));
-        //Dev only - Remove after Petter test the app
-        setZoneNamesForUser(zonesToSend);
-        //END REMOVE
-      } catch (e) {
-        console.log('Failed to save zonesToSend in LocalStorage');
-      }
+      await writeToAsyncStorage('zonesToSend', JSON.stringify(zonesToSend));
+      setZoneNamesForUser(zonesToSend);
     } else {
-      try {
-        await AsyncStorage.setItem('zonesToSend', JSON.stringify(tmpUserZones));
-        //Dev only - Remove after Petter test the app
-        setZoneNamesForUser(tmpUserZones);
-        //END REMOVE
-      } catch (e) {
-        console.log('Failed to save zonesToSend in LocalStorage');
-      }
+      await writeToAsyncStorage('zonesToSend', JSON.stringify(tmpUserZones));
+      setZoneNamesForUser(tmpUserZones);
     }
 
     // Check if the service should be stopped
     // Depending on the Closing timer set by Slider
-    // await shouldShutdownService();
+    await shouldShutdownService();
   };
 
   return {
