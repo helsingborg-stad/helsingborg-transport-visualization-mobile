@@ -45,10 +45,12 @@ export function useEventTask() {
   ): Promise<string> => {
     return new Promise((resolve, reject) => {
       postEvent(eventID, formattedZone)
-        .then(() => {
+        .then((res) => {
+          console.log('####################### Success', res);
           resolve(zoneID);
         })
-        .catch(() => {
+        .catch((err) => {
+          console.log('####################### Fail', err);
           reject(zoneID);
         });
     });
@@ -142,14 +144,12 @@ export function useEventTask() {
       let distributionZoneId = null;
       // const newPt = turf.point([100.730018737, 100.025278798]);
 
-      const promises: Promise<string>[] = [];
       //Check if type distribution is in Local storage
       const distributionObject = await readFromAsyncStorage('distributionId');
 
-      zonesToSend.forEach(async (zone) => {
+      const promiseArr: Promise<string>[] = zonesToSend.map(async (zone) => {
         const poly = zone;
         const isInsideZone = turf.booleanPointInPolygon(pt, poly);
-
         if (!isInsideZone) {
           if (
             zone.properties.type &&
@@ -179,17 +179,20 @@ export function useEventTask() {
           const eventID = zone.properties.id;
           //Call the API
           setApiCallStatus('Attempting to store event');
-          const result = sendEventToServer(
-            eventID,
-            formattedZone,
-            zone.properties.id
-          );
-          promises.push(result);
+          return sendEventToServer(eventID, formattedZone, zone.properties.id);
         }
       });
 
-      Promise.all(promises)
-        .then(async (results) => {
+      Promise.all(promiseArr)
+        .then(async (promiseResults) => {
+          //we remove undefined or null values
+          const results = promiseResults.filter((elem) => elem);
+
+          if (results.length < 1) {
+            console.log('No requests were made. No need to do any thing else');
+            return;
+          }
+
           setApiCallStatus(
             'Event stored successfully (' + results.length + ')'
           );
@@ -205,12 +208,20 @@ export function useEventTask() {
             zonesToSend = null;
             //Dev only - Remove after Petter test the app
             setZoneNamesForUser([]);
+            setIsInsideDistributionZone(false);
+
             //END REMOVE
           } else {
             const tmpDistID =
               distributionZone && distributionZone.properties.id;
-            const tmpIsInsideDistZone = results.includes(tmpDistID);
-            setIsInsideDistributionZone(!tmpIsInsideDistZone);
+
+            if (!tmpDistID) {
+              setIsInsideDistributionZone(false);
+            } else {
+              const isDistIDPushed = results.includes(tmpDistID);
+              setIsInsideDistributionZone(!isDistIDPushed);
+            }
+
             await writeToAsyncStorage(
               'zonesToSend',
               JSON.stringify(filteredZones)
@@ -224,6 +235,7 @@ export function useEventTask() {
           console.log('Failed to store an event', err);
           setApiCallStatus('Could Not store Event, API call Failed -> ' + err);
         });
+
       //Clear the API status string
       setTimeout(() => {
         setApiCallStatus('');
@@ -255,10 +267,12 @@ export function useEventTask() {
         const tmpZone = zonesToSend.filter(
           (z) => z.properties.id === zone.properties.id
         );
-        if (tmpZone.length > 0) {
-          zonesToSend.push(zone[0]);
+
+        if (tmpZone.length < 0) {
+          zonesToSend.push(zone);
         }
       });
+
       await writeToAsyncStorage('zonesToSend', JSON.stringify(zonesToSend));
       setZoneNamesForUser(zonesToSend);
     } else {

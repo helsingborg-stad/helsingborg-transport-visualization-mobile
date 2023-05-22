@@ -40,6 +40,7 @@ export const HomeScreen: FC = () => {
   const [showDevInfoModal, setShowDevInfoModal] = useState(false);
   const [isChangingServiceStatus, setIsChangingServiceStatus] = useState(false);
   const [oldStateDeleted, setOldStateDeleted] = useState('');
+  const [counter, setCounter] = useState(0);
 
   //Hooks
   const { currentStopTrackingTime, timeLeft } = useGetTrackingTimeText(
@@ -75,6 +76,22 @@ export const HomeScreen: FC = () => {
       setIsTracking(serviceStatus);
     }
   }, [serviceStatus]);
+
+  useEffect(() => {
+    if (isServiceCalled) {
+      setCounter(0);
+    }
+  }, [isServiceCalled]);
+
+  useEffect(() => {
+    let interval = null;
+    setCounter(0);
+    interval = setInterval(() => {
+      setCounter((v) => v + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   //Functions
   const toggleLocationService = async () => {
@@ -152,6 +169,7 @@ export const HomeScreen: FC = () => {
       <StyledModal visible={showDevInfoModal}>
         <ModalBackDrop onPress={() => setShowDevInfoModal(false)} />
         <StyledModalChildContainer>
+          <StyledOldState>{counter}</StyledOldState>
           <StyledOldState>{oldStateDeleted}</StyledOldState>
 
           <StyledServiceContainer>
@@ -174,17 +192,15 @@ export const HomeScreen: FC = () => {
           </StyledUserLocationContainer>
 
           <StyledUserLocationContainer>
-            <StyledHeader>Is Distribution Zone:</StyledHeader>
+            <StyledHeader>Distribution Zone:</StyledHeader>
 
             <StyledBody>
-              {isInsideDistributionZone
-                ? 'Inside a distribution'
-                : 'Not inside a distribution zone'}
+              Inside a distribution zone : {' ' + isInsideDistributionZone}
             </StyledBody>
 
             {distributionZone && (
               <StyledBody>
-                Name:{' '}
+                Current Distribution Zone:{' '}
                 {distributionZone
                   ? distributionZone.properties.name
                   : 'cannot get the name of zone'}
