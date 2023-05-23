@@ -125,8 +125,8 @@ export function useEventTask() {
 
     setDetailEventLog((v) => [...v, '-------------------------']);
 
-    const pt = turf.point([24.688818841, 59.408275184]);
-    // const pt = turf.point([location.longitude, location.latitude]);
+    // const pt = turf.point([24.688818841, 59.408275184]);
+    const pt = turf.point([location.longitude, location.latitude]);
 
     //Check the local storage and see if there are any zones
     let zonesToSend: ZoneFeature[] = await readFromAsyncStorage('zonesToSend');
@@ -147,14 +147,14 @@ export function useEventTask() {
       }
 
       let distributionZoneId = null;
-      const newPt = turf.point([100.730018737, 100.025278798]);
+      // const newPt = turf.point([100.730018737, 100.025278798]);
 
       //Check if type distribution is in Local storage
       const distributionObject = await readFromAsyncStorage('distributionId');
 
       const promiseArr: Promise<string>[] = zonesToSend.map(async (zone) => {
         const poly = zone;
-        const isInsideZone = turf.booleanPointInPolygon(newPt, poly);
+        const isInsideZone = turf.booleanPointInPolygon(pt, poly);
         if (!isInsideZone) {
           setDetailEventLog((v) => [
             ...v,
