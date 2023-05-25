@@ -1,6 +1,6 @@
 module.exports = {
   root: true,
-  plugins: ['@typescript-eslint', 'import', 'prettier', '@tanstack/query'],
+  plugins: ['@typescript-eslint', 'import', 'prettier'],
   rules: {
     'no-undef': 'error',
     'no-var': 'error',
@@ -8,15 +8,12 @@ module.exports = {
     '@typescript-eslint/no-use-before-define': 'off',
     'import/no-extraneous-dependencies': 'off',
     '@typescript-eslint/no-shadow': 'off',
-    '@tanstack/query/exhaustive-deps': 'error',
-    '@tanstack/query/prefer-query-object-syntax': 'error',
   },
   extends: [
     'airbnb-typescript/base',
     'plugin:prettier/recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:import/typescript',
-    'plugin:@tanstack/eslint-plugin-query/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
