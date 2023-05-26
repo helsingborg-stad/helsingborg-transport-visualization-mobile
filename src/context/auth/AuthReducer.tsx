@@ -8,6 +8,7 @@ export const reducer = (state: AuthState, action: Action) => {
         trackingId: action.payload.trackingId,
         token: action.payload.token,
         isLoggedIn: action.payload.isLoggedIn,
+        isTokenExpired: action.payload.isTokenExpired,
         id: action.payload.id,
         orgNumber: action.payload.orgNumber,
         pin: action.payload.pin,
@@ -21,6 +22,7 @@ export const reducer = (state: AuthState, action: Action) => {
         ...state,
         token: null,
         isLoggedIn: action.payload.isLoggedIn,
+        isTokenExpired: action.payload.isTokenExpired,
       };
     }
     default: {

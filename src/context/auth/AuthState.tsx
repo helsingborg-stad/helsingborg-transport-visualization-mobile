@@ -5,6 +5,7 @@ import React, {
   useReducer,
   useState,
 } from 'react';
+import jwt_decode from 'jwt-decode';
 import * as SecureStore from 'expo-secure-store';
 import { reducer } from './AuthReducer';
 import { ActionType, AuthContextProps, User } from './AuthTypes';
@@ -21,6 +22,7 @@ export const AuthStore = () => {
     createdAt: '',
     updatedAt: '',
     isLoggedIn: false,
+    isTokenExpired: true,
     isLoading: true,
   };
 
@@ -31,13 +33,20 @@ export const AuthStore = () => {
   const getTokenFromStore = async () => {
     const userStr = await SecureStore.getItemAsync('user');
     const user: User = JSON.parse(userStr);
+
     if (user) {
+      //check if user's token is still valid.
+      const decoded: any = jwt_decode(user?.token);
+      const tokenStatus = Math.floor(Date.now() / 1000) > decoded.exp;
+      console.log('--> is token expired: ', tokenStatus);
+
       dispatch({
         type: ActionType.LOGIN,
         payload: {
           trackingId: user.trackingId,
           token: user.token,
           isLoggedIn: user.isLoggedIn,
+          isTokenExpired: tokenStatus,
           id: user.id,
           orgNumber: user.orgNumber,
           pin: user.pin,
@@ -74,7 +83,8 @@ export const AuthStore = () => {
         payload: {
           trackingId: '',
           token: user.token,
-          isLoggedIn: true,
+          isLoggedIn: user.isLoggedIn,
+          isTokenExpired: user.isTokenExpired,
           id: user.id,
           orgNumber: user.orgNumber,
           pin: user.pin,
@@ -98,10 +108,17 @@ export const AuthStore = () => {
       // await SecureStore.deleteItemAsync('user');
       const userStr = await SecureStore.getItemAsync('user');
       const userObj = JSON.parse(userStr);
-      const updatedUser = { ...userObj, isLoggedIn: false };
+      const updatedUser = {
+        ...userObj,
+        isLoggedIn: false,
+        isTokenExpired: true,
+      };
       await SecureStore.setItemAsync('user', JSON.stringify(updatedUser));
 
-      dispatch({ type: ActionType.LOGOUT, payload: { isLoggedIn: false } });
+      dispatch({
+        type: ActionType.LOGOUT,
+        payload: { isLoggedIn: false, isTokenExpired: true },
+      });
     } catch {
       throw new Error('logout failed');
     } finally {
@@ -116,6 +133,7 @@ export const AuthStore = () => {
       pin: state.pin,
     },
     isLoggedIn: state.isLoggedIn,
+    isTokenExpired: state.isTokenExpired,
     isLoading,
     setUser,
     logout,

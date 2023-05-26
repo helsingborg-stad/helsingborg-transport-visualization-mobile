@@ -17,7 +17,7 @@ const Container = styled.View`
 `;
 
 export const Navigation = () => {
-  const { isLoading, isLoggedIn } = useAuthContext();
+  const { isLoading, isLoggedIn, isTokenExpired } = useAuthContext();
   const [locationBgPermissionStatus, setLocationBgPermissionStatus] =
     useState(false);
   const {
@@ -47,9 +47,10 @@ export const Navigation = () => {
       </Container>
     );
   }
+  console.log('----> log status', isLoggedIn, isTokenExpired);
   return (
     <NavigationContainer>
-      {isLoggedIn ? <HomeStack /> : <AuthStack />}
+      {isLoggedIn && !isTokenExpired ? <HomeStack /> : <AuthStack />}
     </NavigationContainer>
   );
 };

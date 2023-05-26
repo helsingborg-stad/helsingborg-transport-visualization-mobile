@@ -66,28 +66,53 @@ export const HomeScreen: FC = () => {
 
   // Use Effects
   useEffect(() => {
-    checkStatusAsync();
-    toggleLocationService();
+    const checkServiceStatus = async () => {
+      const { isRegistered, status } = await checkStatusAsync();
+      //if service is not registered yet and it is available we start on load
+      //other wise service is already running so we update the local state
+      if (!isRegistered && status?.toLowerCase() === 'available') {
+        try {
+          await AsyncStorage.removeItem('zonesToSend');
+          await AsyncStorage.removeItem('distributionId');
+          setOldStateDeleted('Old state deleted when start the service');
+        } catch (error) {
+          setOldStateDeleted('Failed to delete old state ' + error);
+        }
+        await startBackgroundUpdate();
+        setIsChangingServiceStatus(false);
+        setShowDevInfoModal(true);
+        setIsTracking(true);
+      } else {
+        setIsTracking(true);
+        setIsChangingServiceStatus(false);
+        setShowDevInfoModal(true);
+      }
+    };
+    checkServiceStatus();
   }, []);
 
+  //When location is available we start execute the task
   useEffect(() => {
     if (userLocation) {
       EventTask(userLocation);
     }
   }, [userLocation]);
 
+  //update if the service is still tracking
   useEffect(() => {
     if (serviceStatus) {
       setIsTracking(serviceStatus);
     }
   }, [serviceStatus]);
 
+  //reset the counter
   useEffect(() => {
     if (isServiceCalled) {
       setCounter(0);
     }
   }, [isServiceCalled]);
 
+  //start the counter on load
   useEffect(() => {
     let interval = null;
     setCounter(0);
@@ -103,6 +128,7 @@ export const HomeScreen: FC = () => {
     if (isTracking) {
       await stopBackgroundUpdate();
       setIsChangingServiceStatus(true);
+      setIsTracking(false);
       logout();
     } else {
       //we reset the local state every time we start the service
@@ -117,6 +143,7 @@ export const HomeScreen: FC = () => {
       await startBackgroundUpdate();
       setIsChangingServiceStatus(true);
       setShowDevInfoModal(true);
+      setIsTracking(true);
     }
 
     checkStatusAsync();
@@ -133,6 +160,10 @@ export const HomeScreen: FC = () => {
       isRegistered
     );
     setIsChangingServiceStatus(false);
+    return {
+      isRegistered,
+      status: BackgroundFetch.BackgroundFetchStatus[status],
+    };
   };
 
   return (

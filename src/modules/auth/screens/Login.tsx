@@ -133,6 +133,7 @@ export const LoginScreen: FC = () => {
         const extraKeys = {
           pin: pin,
           isLoggedIn: true,
+          isTokenExpired: false,
           trackingId: trackingId,
         };
 
