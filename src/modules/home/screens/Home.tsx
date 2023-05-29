@@ -98,6 +98,14 @@ export const HomeScreen: FC = () => {
     }
   }, [userLocation]);
 
+  useEffect(() => {
+    if (isServiceClosed) {
+      setIsChangingServiceStatus(true);
+      setIsTracking(false);
+      logout();
+    }
+  }, [isServiceClosed]);
+
   //update if the service is still tracking
   useEffect(() => {
     if (serviceStatus) {

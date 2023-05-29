@@ -39,16 +39,18 @@ export function useGetTrackingTimeText(
   }, [endTime, isTracking]);
 
   const calculateHoursToStopTracking = async (hours: number) => {
-    const hoursToAdd = 1000 * 60 * 60 * hours;
+    // const hoursToAdd = 1000 * 60 * 60 * hours;
+    const hoursToAdd = 1000 * 60 * hours;
     const stopTime = new Date(new Date().getTime() + hoursToAdd);
     // We save the Shutdown time to local storage for auto
     // Shutdown of LocationService
     try {
       //Store new value, it should overwrite the old value
-      await AsyncStorage.setItem(
-        'shutDownTime',
-        JSON.stringify(Date.parse(stopTime.toISOString()))
-      );
+      const timeToStore = {
+        stopTime: Date.parse(stopTime.toISOString()),
+        startTime: Date.now(),
+      };
+      await AsyncStorage.setItem('shutDownTime', JSON.stringify(timeToStore));
     } catch (e) {
       console.log('Failed to store shutDownTime');
       //Service will not shut down automatically!

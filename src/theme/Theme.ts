@@ -18,7 +18,7 @@ const SUCCESS_MAIN = '#4CAF50';
 const ERROR_MAIN = '#CC0000';
 const WARNING_LIGHT = '#FFB547';
 const WARNING_MAIN = '#F29102';
-const INFO_MAIN = '#4F86C9';
+const INFO_MAIN = '#007AFF';
 
 const theme = {
   space: {

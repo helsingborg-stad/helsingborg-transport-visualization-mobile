@@ -24,6 +24,8 @@ import { getOrganisations, login } from '@src/api/auth';
 import { OrganisationResponse, LoginResponse } from '@src/api/types';
 import { useAuthContext } from '@src/context/auth/AuthState';
 import { User } from '@src/context/auth/AuthTypes';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { StoredServiceTimeType } from './types';
 
 export const LoginScreen: FC = () => {
   const theme = useTheme();
@@ -45,6 +47,10 @@ export const LoginScreen: FC = () => {
   >([]);
   const [isLoadingOrgs, setIsLoadingOrgs] = useState(true);
   const [storedUser, setStoredUser] = useState<User | null>();
+  //Service timer popup
+  const [showServiceTimerPopup, setShowServiceTimerPopup] = useState(false);
+  const [serviceTimes, setServiceTimes] =
+    useState<StoredServiceTimeType | null>(null);
 
   //Fetch organisations on Load
   useEffect(() => {
@@ -73,6 +79,22 @@ export const LoginScreen: FC = () => {
       }
     };
     getDataFromStore();
+  }, []);
+
+  //check if there service had time set
+  useEffect(() => {
+    const getShutdownTime = async () => {
+      const shutDownTimeObj = await readFromAsyncStorage('shutDownTime');
+      if (shutDownTimeObj) {
+        setShowServiceTimerPopup(true);
+        setServiceTimes(shutDownTimeObj);
+      } else {
+        console.log('shutDownTime key not found');
+        setShowServiceTimerPopup(false);
+        setServiceTimes(null);
+      }
+    };
+    getShutdownTime();
   }, []);
 
   //Check if Organisations are fetched then set the user current Organistaion
@@ -151,6 +173,57 @@ export const LoginScreen: FC = () => {
       });
   };
 
+  const readFromAsyncStorage = async (key: string) => {
+    try {
+      let jsonObject = null;
+      const jsonValue = await AsyncStorage.getItem(key);
+      jsonObject = jsonValue != null ? JSON.parse(jsonValue) : null;
+      return jsonObject;
+    } catch (e) {
+      console.log('Failed to read ' + key);
+      return null;
+    }
+  };
+
+  const getServiceRunTimes = () => {
+    // serviceTimes
+    if (!showServiceTimerPopup) return;
+
+    const startDate = new Date(serviceTimes?.startTime);
+    const stopDate = new Date(serviceTimes?.stopTime);
+
+    //Calculate and format start time
+    const startMonth = startDate.toLocaleDateString('sv-SE', { month: 'long' });
+    const startDay = startDate.getDate();
+    const startTime = startDate
+      .toLocaleTimeString('sv-SE', {
+        hour12: false,
+      })
+      .slice(0, -3);
+
+    //Calculate and format end time
+    const stopMonth = stopDate.toLocaleDateString('sv-SE', { month: 'long' });
+    const stopDay = stopDate.getDate();
+    const stopTime = stopDate
+      .toLocaleTimeString('sv-SE', {
+        hour12: false,
+      })
+      .slice(0, -3);
+
+    if (startMonth === stopMonth && startDay === stopDay) {
+      return `${startDay} ${startMonth}, ${startTime} - ${stopTime}`;
+    }
+
+    return `${startDay} ${startMonth} ${startTime} - ${stopDay} ${stopMonth} ${stopTime}`;
+  };
+
+  const handleTimerPopupClose = async () => {
+    //delete the timer from local storage
+    await AsyncStorage.removeItem('shutDownTime');
+    setShowServiceTimerPopup(false);
+    setServiceTimes(null);
+  };
+
   return (
     <StyledScreen preset="auto" safeAreaEdges={['top', 'bottom']}>
       <Wrapper>
@@ -227,6 +300,19 @@ export const LoginScreen: FC = () => {
           />
         </StyledModalChildContainer>
       </StyledModal>
+
+      <StyledServiceTimerModal visible={showServiceTimerPopup}>
+        <StyledServiceTimerBackdrop onPress={() => handleTimerPopupClose()}>
+          <StyledServiceTimerModalChildContainer>
+            <StyledSubTitle>Färddata sparad</StyledSubTitle>
+            <StyledSubBody>{getServiceRunTimes()}</StyledSubBody>
+            <StyledSeparator />
+            <StyledModalButton onPress={() => handleTimerPopupClose()}>
+              <StyledModalButtonText>Okej</StyledModalButtonText>
+            </StyledModalButton>
+          </StyledServiceTimerModalChildContainer>
+        </StyledServiceTimerBackdrop>
+      </StyledServiceTimerModal>
     </StyledScreen>
   );
 };
@@ -310,4 +396,36 @@ const StyleButton = styled(Button)`
 const StyledModalChildContainer = styled(ModalChildContainer)`
   padding-top: ${({ theme }) => theme.space.xl};
   padding-bottom: ${({ theme }) => theme.space.xl};
+`;
+
+const StyledServiceTimerModal = styled(Modal)``;
+
+const StyledServiceTimerBackdrop = styled(ModalBackDrop)`
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+`;
+
+const StyledServiceTimerModalChildContainer = styled(ModalChildContainer)`
+  padding-top: 30px;
+  width: 70%;
+  border-radius: 7px;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+`;
+const StyledSeparator = styled.View`
+  width: 100%;
+  height: 1px;
+  background-color: ${({ theme }) => theme.colors.primary.borderColor};
+`;
+const StyledModalButton = styled.TouchableOpacity`
+  padding: 10px 0;
+`;
+
+const StyledModalButtonText = styled(SubTitle)`
+  color: ${({ theme }) => theme.colors.state.info};
 `;

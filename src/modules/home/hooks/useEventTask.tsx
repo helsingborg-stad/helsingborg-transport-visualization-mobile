@@ -57,9 +57,9 @@ export function useEventTask() {
 
   const shouldShutdownService = async () => {
     try {
-      const shutDownTimeStr = await AsyncStorage.getItem('shutDownTime');
-      if (shutDownTimeStr && shutDownTimeStr.length > 0) {
-        const shutDownTime = parseInt(shutDownTimeStr);
+      const shutDownTimeObj = await readFromAsyncStorage('shutDownTime');
+      const shutDownTime = shutDownTimeObj?.stopTime;
+      if (shutDownTime) {
         const currentTime = Date.now();
         if (currentTime > shutDownTime) {
           //We Shut down the tracking!
