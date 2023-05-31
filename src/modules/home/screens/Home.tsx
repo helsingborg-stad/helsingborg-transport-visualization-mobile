@@ -18,7 +18,7 @@ import {
   startBackgroundUpdate,
 } from '../services/BackgroundLocationService';
 import { useEventTask } from '../hooks/useEventTask';
-import { DebugModal } from '../components/DebugModal';
+// import { DebugModal } from '../components/DebugModal';
 
 //
 //
@@ -30,8 +30,8 @@ export const HomeScreen: FC = () => {
   const [hoursToTrack, setHoursToTrack] = useState(8);
   const [isTracking, setIsTracking] = useState(false);
   const [isChangingServiceStatus, setIsChangingServiceStatus] = useState(false);
-  const [showDevInfoModal, setShowDevInfoModal] = useState(false);
-  const [oldStateDeleted, setOldStateDeleted] = useState('');
+  // const [showDevInfoModal, setShowDevInfoModal] = useState(false);
+  // const [oldStateDeleted, setOldStateDeleted] = useState('');
   // const [counter, setCounter] = useState(0);
 
   //Hooks
@@ -42,14 +42,14 @@ export const HomeScreen: FC = () => {
 
   const {
     EventTask,
-    isServiceCalled,
     isServiceClosed,
-    location,
-    apiCallStatus,
-    userZones,
-    distributionZone,
-    isInsideDistributionZone,
-    detailEventLog,
+    // isServiceCalled,
+    // location,
+    // apiCallStatus,
+    // userZones,
+    // distributionZone,
+    // isInsideDistributionZone,
+    // detailEventLog,
   } = useEventTask();
 
   // Use Effects
@@ -62,18 +62,18 @@ export const HomeScreen: FC = () => {
         try {
           await AsyncStorage.removeItem('zonesToSend');
           await AsyncStorage.removeItem('distributionId');
-          setOldStateDeleted('Old state deleted when start the service');
+          // setOldStateDeleted('Old state deleted when start the service');
         } catch (error) {
-          setOldStateDeleted('Failed to delete old state ' + error);
+          // setOldStateDeleted('Failed to delete old state ' + error);
         }
         await startBackgroundUpdate();
         setIsChangingServiceStatus(false);
-        setShowDevInfoModal(true);
+        // setShowDevInfoModal(true);
         setIsTracking(true);
       } else {
         setIsTracking(true);
         setIsChangingServiceStatus(false);
-        setShowDevInfoModal(true);
+        // setShowDevInfoModal(true);
       }
     };
     checkServiceStatus();
@@ -113,14 +113,14 @@ export const HomeScreen: FC = () => {
       try {
         await AsyncStorage.removeItem('zonesToSend');
         await AsyncStorage.removeItem('distributionId');
-        setOldStateDeleted('Old state deleted when start the service');
+        // setOldStateDeleted('Old state deleted when start the service');
       } catch (error) {
-        setOldStateDeleted('Failed to delete old state ' + error);
+        // setOldStateDeleted('Failed to delete old state ' + error);
       }
 
       await startBackgroundUpdate();
       setIsChangingServiceStatus(true);
-      setShowDevInfoModal(true);
+      // setShowDevInfoModal(true);
       setIsTracking(true);
     }
 
@@ -180,7 +180,7 @@ export const HomeScreen: FC = () => {
         />
       </Wrapper>
       {/* Modal to show debug info */}
-      <DebugModal
+      {/* <DebugModal
         isServiceClosed={isServiceClosed}
         isServiceCalled={isServiceCalled}
         apiCallStatus={apiCallStatus}
@@ -192,7 +192,7 @@ export const HomeScreen: FC = () => {
         showDevInfoModal={showDevInfoModal}
         setShowDevInfoModal={setShowDevInfoModal}
         oldStateDeleted={oldStateDeleted}
-      />
+      /> */}
     </StyledScreen>
   );
 };
