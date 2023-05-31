@@ -39,8 +39,7 @@ export function useGetTrackingTimeText(
   }, [endTime, isTracking]);
 
   const calculateHoursToStopTracking = async (hours: number) => {
-    // const hoursToAdd = 1000 * 60 * 60 * hours;
-    const hoursToAdd = 1000 * 60 * hours;
+    const hoursToAdd = 1000 * 60 * 60 * hours;
     const stopTime = new Date(new Date().getTime() + hoursToAdd);
     // We save the Shutdown time to local storage for auto
     // Shutdown of LocationService

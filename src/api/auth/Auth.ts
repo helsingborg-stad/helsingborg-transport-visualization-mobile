@@ -30,13 +30,6 @@ export const login = (request: LoginRequest) => {
         reject(error);
       });
   });
-
-  // const { data } = await client.post<LoginResponse>(
-  //   url,
-  //   JSON.stringify(request)
-  // );
-
-  // return data;
 };
 
 export const getOrganisations = () => {
@@ -65,7 +58,4 @@ export const getOrganisations = () => {
         reject(error);
       });
   });
-
-  // const { data } = await client.get<LoginResponse>(url);
-  // return data;
 };
