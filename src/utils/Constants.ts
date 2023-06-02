@@ -1,5 +1,5 @@
 export const BASE_URL =
-  ' https://helsingborg-transport-visualization-backend-umfrisc3pa-lz.a.run.app';
+  'https://helsingborg-transport-visualization-backend-umfrisc3pa-lz.a.run.app';
 
 //Staging url
 // export const BASE_URL =
