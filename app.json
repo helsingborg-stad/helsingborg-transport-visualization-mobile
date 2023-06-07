@@ -37,7 +37,11 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow Sam to use your location."
+          "locationAlwaysAndWhenInUsePermission": "$(PRODUCT_NAME) använder din platsinformation för att logga händelser när du utför leveranser till bestämda platser. Appen spårar inte ditt rörelsemönster utan endast när du ankommer eller lämnar en leveranszon.",
+          "locationAlwaysPermission": "$(PRODUCT_NAME) använder din platsinformation för att logga händelser när du utför leveranser till bestämda platser. Appen spårar inte ditt rörelsemönster utan endast när du ankommer eller lämnar en leveranszon.",
+          "locationWhenInUsePermission": "$(PRODUCT_NAME) använder din platsinformation för att logga händelser när du utför leveranser till bestämda platser. Appen spårar inte ditt rörelsemönster utan endast när du ankommer eller lämnar en leveranszon.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true
         }
       ]
     ]
