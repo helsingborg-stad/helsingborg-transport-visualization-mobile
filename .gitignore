@@ -9,7 +9,8 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
-
+android
+ios
 # macOS
 .DS_Store
 
@@ -18,4 +19,8 @@ web-build/
 
 .eslintcache
 .env
+.env.local
+.env.staging
+.env.production
 .vscode
+.idea

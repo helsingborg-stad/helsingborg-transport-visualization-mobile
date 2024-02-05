@@ -3,22 +3,23 @@ import { postEvent } from '@src/api/zone';
 import * as turf from '@turf/turf';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
-import { LOCATION_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Constants';
 import { User } from '@src/context/auth/AuthTypes';
 import { useGetAllZones } from '@src/modules/home/hooks/useGetAllZones';
 import { ZoneFeature } from '../types';
 import { LocationObjectCoords } from 'expo-location';
 import { EventRequestType } from '@src/api/types';
-import { stopBackgroundUpdate } from '../services/BackgroundLocationService';
 
-export function useEventTask() {
+export function useEventTask(stopLocationUpdates) {
   const [isServiceCalled, setIsServiceCalled] = useState(false);
   const [isServiceClosed, setIsServiceClosed] = useState(false);
-  const [location, setLocation] = useState(null);
+  const [location, setLocation] = useState<LocationObjectCoords>();
+  const [recordedLocations, setRecordedLocations] = useState<
+    LocationObjectCoords[]
+  >([]);
   const [apiCallStatus, setApiCallStatus] = useState<string>('');
-  const [userZones, setUserZones] = useState<ZoneFeature[]>(null);
+  const [userZones, setUserZones] = useState<ZoneFeature[]>([]);
   //
-  const [distributionZone, setDistributionZone] = useState(null);
+  const [distributionZone, setDistributionZone] = useState<ZoneFeature>();
   const [isInsideDistributionZone, setIsInsideDistributionZone] =
     useState(false);
   const [detailEventLog, setDetailEventLog] = useState([]);
@@ -31,11 +32,11 @@ export function useEventTask() {
   //Test Only Methods: For Petter
   const setZoneNamesForUser = (zonesToParse: ZoneFeature[]) => {
     //Dev only - Remove after Petter test the app
-    let userZoneName = [];
+    let userZone = [];
     zonesToParse.forEach((zone) => {
-      userZoneName = [...userZoneName, zone.properties.name];
+      userZone = [...userZone, zone];
     });
-    setUserZones(userZoneName);
+    setUserZones(userZone);
     //END REMOVE
   };
 
@@ -63,7 +64,7 @@ export function useEventTask() {
         const currentTime = Date.now();
         if (currentTime > shutDownTime) {
           //We Shut down the tracking!
-          await stopBackgroundUpdate();
+          await stopLocationUpdates();
           setIsServiceClosed(true);
           setIsServiceCalled(false);
           setApiCallStatus('Inactive');
@@ -97,32 +98,28 @@ export function useEventTask() {
   const EventTask = async (location: LocationObjectCoords) => {
     // if zones or location is not available then we cannot do anything
     // just return
-    if (!zones || !location) {
-      console.log('zones or location not ready yet');
+
+    if (!location) {
+      console.log('location not ready yet');
       return;
-    }
-    // If we have a service call and it is called again before the limit
-    // we do nothing
-    if (serviceTimeRef.current) {
-      const currTime = Date.now();
-      const timeElapsed = currTime - serviceTimeRef.current;
-      if (timeElapsed < LOCATION_SERVICE_CALL_INTERVAL_TIME) {
-        console.log('Called Too Soon!');
-        return;
-      }
     }
 
     serviceTimeRef.current = Date.now();
 
     //Dev only - Remove after Petter test the app
-    setIsServiceCalled(true);
-    setTimeout(() => {
-      setIsServiceCalled(false);
-    }, 3000);
+    // setIsServiceCalled(true);
+    // setTimeout(() => {
+    //   setIsServiceCalled(false);
+    // }, 3000);
 
     setLocation(location);
+    setRecordedLocations((prevLocations) => [...prevLocations, location]);
     //END REMOVE
 
+    if (!zones) {
+      console.log('zones not ready yet');
+      return;
+    }
     setDetailEventLog((v) => [...v, '-------------------------']);
 
     // const pt = turf.point([24.688818841, 59.408275184]);
@@ -134,6 +131,8 @@ export function useEventTask() {
       ...v,
       'Total ZoneToSend(Memory): ' + zonesToSend?.length,
     ]);
+
+    console.log('zonesToSend length', zonesToSend?.length);
 
     if (zonesToSend) {
       //Get Tracking ID
@@ -325,7 +324,9 @@ export function useEventTask() {
     isServiceCalled,
     isServiceClosed,
     location,
+    recordedLocations,
     apiCallStatus,
+    zones,
     userZones,
     distributionZone,
     isInsideDistributionZone,
