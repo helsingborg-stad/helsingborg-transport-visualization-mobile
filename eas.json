@@ -5,12 +5,22 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://helsingborg-transport-visualization-backend-3ca3faqvfa-lz.a.run.app"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://helsingborg-transport-visualization-backend-3ca3faqvfa-lz.a.run.app"
+      }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://helsingborg-transport-visualization-backend-umfrisc3pa-lz.a.run.app"
+      }
+    }
   },
   "submit": {
     "production": {}

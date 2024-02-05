@@ -1,5 +1,7 @@
 {
   "expo": {
+    "slug": "helsingborg-app",
+    "name": "Sam",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/app_icon.png",

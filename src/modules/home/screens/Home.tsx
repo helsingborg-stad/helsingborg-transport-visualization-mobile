@@ -1,28 +1,27 @@
 import React, { FC, useEffect, useState } from 'react';
 import styled from 'styled-components/native';
-import { SubTitle, Screen, LargeTitle, Body, Button } from '@src/components';
+import {
+  SubTitle,
+  Screen,
+  LargeTitle,
+  Body,
+  Button,
+  ActivityIndicator,
+} from '@src/components';
 
 import Slider from '@react-native-community/slider';
 import { useTheme } from 'styled-components';
-import { Platform } from 'react-native';
+import { Platform, TouchableWithoutFeedback } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthContext } from '@src/context/auth';
 import { useGetTrackingTimeText } from '../hooks/useGetTrackingTimeText';
 import * as BackgroundFetch from 'expo-background-fetch';
 import * as TaskManager from 'expo-task-manager';
 import { LOCATION_TASK_NAME } from '@src/utils/Constants';
-import { userLocation } from '@src/taskManager/TaskManager';
-import { serviceStatus } from '../services/BackgroundLocationService';
-import {
-  stopBackgroundUpdate,
-  startBackgroundUpdate,
-} from '../services/BackgroundLocationService';
-import { useEventTask } from '../hooks/useEventTask';
-// import { DebugModal } from '../components/DebugModal';
+import { DebugModal } from '../components/DebugModal';
+import Map from '@src/modules/home/components/Map/Map';
+import { useGeolocationContext } from '@src/context/geolocation/geolocationContext';
 
-//
-//
-//
 export const HomeScreen: FC = () => {
   const { logout } = useAuthContext();
   const theme = useTheme();
@@ -30,9 +29,9 @@ export const HomeScreen: FC = () => {
   const [hoursToTrack, setHoursToTrack] = useState(8);
   const [isTracking, setIsTracking] = useState(false);
   const [isChangingServiceStatus, setIsChangingServiceStatus] = useState(false);
-  // const [showDevInfoModal, setShowDevInfoModal] = useState(false);
-  // const [oldStateDeleted, setOldStateDeleted] = useState('');
-  // const [counter, setCounter] = useState(0);
+  const [showDevInfoModal, setShowDevInfoModal] = useState(false);
+  const [oldStateDeleted, setOldStateDeleted] = useState('');
+  const [tapCount, setTapCount] = useState(0);
 
   //Hooks
   const { currentStopTrackingTime, timeLeft } = useGetTrackingTimeText(
@@ -40,17 +39,31 @@ export const HomeScreen: FC = () => {
     isTracking
   );
 
+  const handleTripleTap = () => {
+    setTapCount(tapCount + 1);
+
+    if (tapCount === 2) {
+      // Reset tap count after triple tap
+      setTapCount(0);
+
+      // Show the debug modal
+      setShowDevInfoModal(true);
+    }
+  };
+
   const {
-    EventTask,
     isServiceClosed,
-    // isServiceCalled,
-    // location,
-    // apiCallStatus,
-    // userZones,
-    // distributionZone,
-    // isInsideDistributionZone,
-    // detailEventLog,
-  } = useEventTask();
+    isServiceCalled,
+    location,
+    apiCallStatus,
+    userZones,
+    distributionZone,
+    isInsideDistributionZone,
+    detailEventLog,
+    stopLocationUpdates,
+    startLocationUpdates,
+    serviceStatus,
+  } = useGeolocationContext();
 
   // Use Effects
   useEffect(() => {
@@ -62,29 +75,20 @@ export const HomeScreen: FC = () => {
         try {
           await AsyncStorage.removeItem('zonesToSend');
           await AsyncStorage.removeItem('distributionId');
-          // setOldStateDeleted('Old state deleted when start the service');
+          setOldStateDeleted('Old state deleted when start the service');
         } catch (error) {
-          // setOldStateDeleted('Failed to delete old state ' + error);
+          setOldStateDeleted('Failed to delete old state ' + error);
         }
-        await startBackgroundUpdate();
+        await startLocationUpdates();
         setIsChangingServiceStatus(false);
-        // setShowDevInfoModal(true);
         setIsTracking(true);
       } else {
         setIsTracking(true);
         setIsChangingServiceStatus(false);
-        // setShowDevInfoModal(true);
       }
     };
     checkServiceStatus();
   }, []);
-
-  //When location is available we start execute the task
-  useEffect(() => {
-    if (userLocation) {
-      EventTask(userLocation);
-    }
-  }, [userLocation]);
 
   useEffect(() => {
     if (isServiceClosed) {
@@ -102,31 +106,6 @@ export const HomeScreen: FC = () => {
   }, [serviceStatus]);
 
   //Functions
-  const toggleLocationService = async () => {
-    if (isTracking) {
-      await stopBackgroundUpdate();
-      setIsChangingServiceStatus(true);
-      setIsTracking(false);
-      logout();
-    } else {
-      //we reset the local state every time we start the service
-      try {
-        await AsyncStorage.removeItem('zonesToSend');
-        await AsyncStorage.removeItem('distributionId');
-        // setOldStateDeleted('Old state deleted when start the service');
-      } catch (error) {
-        // setOldStateDeleted('Failed to delete old state ' + error);
-      }
-
-      await startBackgroundUpdate();
-      setIsChangingServiceStatus(true);
-      // setShowDevInfoModal(true);
-      setIsTracking(true);
-    }
-
-    checkStatusAsync();
-  };
-
   const checkStatusAsync = async () => {
     const status = await BackgroundFetch.getStatusAsync();
     const isRegistered = await TaskManager.isTaskRegisteredAsync(
@@ -144,31 +123,77 @@ export const HomeScreen: FC = () => {
     };
   };
 
+  const toggleLocationService = async () => {
+    if (isTracking) {
+      await stopLocationUpdates();
+      setIsChangingServiceStatus(true);
+      setIsTracking(false);
+      logout();
+    } else {
+      //we reset the local state every time we start the service
+      try {
+        await AsyncStorage.removeItem('zonesToSend');
+        await AsyncStorage.removeItem('distributionId');
+        setOldStateDeleted('Old state deleted when start the service');
+      } catch (error) {
+        setOldStateDeleted('Failed to delete old state ' + error);
+      }
+
+      await startLocationUpdates();
+      setIsChangingServiceStatus(true);
+      setIsTracking(true);
+    }
+
+    checkStatusAsync();
+  };
+
   return (
     <StyledScreen preset="auto" safeAreaEdges={['top', 'bottom']}>
+      <Map />
       <Wrapper>
-        <StyledSubTitle>Automatisk stopptid</StyledSubTitle>
-        <TimerContainer>
-          <StyledTimerText>{currentStopTrackingTime}</StyledTimerText>
-        </TimerContainer>
-        <StyledBodyText>{timeLeft}</StyledBodyText>
-        <SliderContainer>
-          <StyledSlider
-            minimumValue={1}
-            maximumValue={12}
-            value={hoursToTrack}
-            thumbTintColor={theme.colors.primary.main}
-            minimumTrackTintColor={theme.colors.primary.main}
-            maximumTrackTintColor={theme.colors.primary.backgroundHighlight}
-            onValueChange={(val) => setHoursToTrack(val)}
-            step={1}
-          />
-          <SliderMinMaxContainer>
-            <StyledRangeText>1 h</StyledRangeText>
-            <Filler />
-            <StyledRangeText>12 h</StyledRangeText>
-          </SliderMinMaxContainer>
-        </SliderContainer>
+        {userZones && userZones.length > 0 ? (
+          <>
+            <TouchableWithoutFeedback onPress={handleTripleTap}>
+              <StyledSubTitle>Inom spårningsområde</StyledSubTitle>
+            </TouchableWithoutFeedback>
+            <ActivityIndicator size={100} />
+            <TimerContainer>
+              {userZones.map((zone) => (
+                <>
+                  <LargeTitle>{zone.properties.name}</LargeTitle>
+                  <Body>{zone.properties.address}</Body>
+                </>
+              ))}
+            </TimerContainer>
+          </>
+        ) : (
+          <>
+            <TouchableWithoutFeedback onPress={handleTripleTap}>
+              <StyledSubTitle>Automatisk stopptid</StyledSubTitle>
+            </TouchableWithoutFeedback>
+            <TimerContainer>
+              <StyledTimerText>{currentStopTrackingTime}</StyledTimerText>
+            </TimerContainer>
+            <StyledBodyText>{timeLeft}</StyledBodyText>
+            <SliderContainer>
+              <StyledSlider
+                minimumValue={1}
+                maximumValue={12}
+                value={hoursToTrack}
+                thumbTintColor={theme.colors.primary.main}
+                minimumTrackTintColor={theme.colors.primary.main}
+                maximumTrackTintColor={theme.colors.primary.backgroundHighlight}
+                onValueChange={(val) => setHoursToTrack(val)}
+                step={1}
+              />
+              <SliderMinMaxContainer>
+                <StyledRangeText>1 h</StyledRangeText>
+                <Filler />
+                <StyledRangeText>12 h</StyledRangeText>
+              </SliderMinMaxContainer>
+            </SliderContainer>
+          </>
+        )}
         <StyleButton
           title={isTracking ? 'Stoppa körning' : 'Starta körning'}
           type="primary"
@@ -180,7 +205,7 @@ export const HomeScreen: FC = () => {
         />
       </Wrapper>
       {/* Modal to show debug info */}
-      {/* <DebugModal
+      <DebugModal
         isServiceClosed={isServiceClosed}
         isServiceCalled={isServiceCalled}
         apiCallStatus={apiCallStatus}
@@ -192,14 +217,12 @@ export const HomeScreen: FC = () => {
         showDevInfoModal={showDevInfoModal}
         setShowDevInfoModal={setShowDevInfoModal}
         oldStateDeleted={oldStateDeleted}
-      /> */}
+      />
     </StyledScreen>
   );
 };
 const StyledScreen = styled(Screen).attrs(() => ({
   contentContainerStyle: {
-    paddingVertical: 22,
-    paddingHorizontal: 22,
     alignItems: 'flex-start',
     justifyContent: 'center',
     flex: 1,
@@ -208,9 +231,11 @@ const StyledScreen = styled(Screen).attrs(() => ({
 
 const Wrapper = styled.View`
   width: 100%;
-  height: 100%;
+  flex: 1;
   justify-content: center;
   align-items: center;
+  padding-top: 22px;
+  padding-bottom: 22px;
 `;
 
 const StyledSubTitle = styled(SubTitle)`
@@ -222,6 +247,7 @@ const TimerContainer = styled.View`
   padding: ${({ theme }) => `${theme.space.lg} ${theme.space.xxl}`};
   border-radius: 15px;
   margin: 10px;
+  align-items: center;
 `;
 
 const StyledTimerText = styled(LargeTitle)``;
@@ -256,7 +282,7 @@ const Filler = styled.View`
 
 const StyleButton = styled(Button)`
   width: 60%;
-  margin-top: ${({ theme }) => theme.space.xxxl};
+  margin-top: ${({ theme }) => theme.space.xl};
   align-self: center;
 `;
 
