@@ -8,6 +8,7 @@ import { useGetAllZones } from '@src/modules/home/hooks/useGetAllZones';
 import { ZoneFeature } from '../types';
 import { LocationObjectCoords } from 'expo-location';
 import { EventRequestType } from '@src/api/types';
+import { MIN_DURATION_IN_ZONE } from '@src/utils/Constants';
 
 export function useEventTask(stopLocationUpdates) {
   const [isServiceCalled, setIsServiceCalled] = useState(false);
@@ -132,8 +133,6 @@ export function useEventTask(stopLocationUpdates) {
       'Total ZoneToSend(Memory): ' + zonesToSend?.length,
     ]);
 
-    console.log('zonesToSend length', zonesToSend?.length);
-
     if (zonesToSend) {
       //Get Tracking ID
       //check if we already have a tracking id in local storage
@@ -151,48 +150,65 @@ export function useEventTask(stopLocationUpdates) {
       //Check if type distribution is in Local storage
       const distributionObject = await readFromAsyncStorage('distributionId');
 
+      zonesToSend = zonesToSend.filter((zone) => {
+        const isInsideZone = turf.booleanPointInPolygon(pt, zone);
+        if (isInsideZone) return true;
+
+        const zoneExitTime = new Date(
+          new Date().toLocaleString('sv-SE', {
+            timeZone: 'UTC',
+            hour12: false,
+          })
+        ).getTime();
+
+        const enteredAtTime = new Date(zone.properties.enteredAtTime).getTime();
+        const durationInZone = zoneExitTime - enteredAtTime;
+
+        return durationInZone > MIN_DURATION_IN_ZONE;
+      });
+
       const promiseArr: Promise<string>[] = zonesToSend.map(async (zone) => {
-        const poly = zone;
-        const isInsideZone = turf.booleanPointInPolygon(pt, poly);
-        if (!isInsideZone) {
-          setDetailEventLog((v) => [
-            ...v,
-            'No longer Inside this zone: ' + zone?.properties?.name,
-          ]);
-          if (
-            zone.properties.type &&
-            zone.properties.type.toLowerCase() === 'distribution'
-          ) {
-            distributionZoneId = null;
-            setIsInsideDistributionZone(true);
-            setDistributionZone(zone);
-            await writeToAsyncStorage(
-              'distributionId',
-              JSON.stringify({ distributionZoneId: zone.properties.id })
-            );
-          } else {
-            if (distributionObject && distributionObject.distributionZoneId) {
-              distributionZoneId = distributionObject.distributionZoneId;
-            }
+        const isInsideZone = turf.booleanPointInPolygon(pt, zone);
+
+        if (isInsideZone) return;
+
+        setDetailEventLog((v) => [
+          ...v,
+          'No longer Inside this zone: ' + zone?.properties?.name,
+        ]);
+        if (
+          zone.properties.type &&
+          zone.properties.type.toLowerCase() === 'distribution'
+        ) {
+          distributionZoneId = null;
+          setIsInsideDistributionZone(true);
+          setDistributionZone(zone);
+          await writeToAsyncStorage(
+            'distributionId',
+            JSON.stringify({ distributionZoneId: zone.properties.id })
+          );
+        } else {
+          if (distributionObject && distributionObject.distributionZoneId) {
+            distributionZoneId = distributionObject.distributionZoneId;
           }
-          const formattedZone = {
-            trackingId: trackingId ?? '',
-            distributionZoneId: distributionZoneId ?? null,
-            enteredAt: zone.properties.enteredAtTime,
-            exitedAt: new Date().toLocaleString('sv-SE', {
-              timeZone: 'UTC',
-              hour12: false,
-            }),
-          };
-          const eventID = zone.properties.id;
-          setDetailEventLog((v) => [
-            ...v,
-            'Zone event payload: ' + JSON.stringify(formattedZone),
-          ]);
-          //Call the API
-          setApiCallStatus('Attempting to store event');
-          return sendEventToServer(eventID, formattedZone, zone.properties.id);
         }
+        const formattedZone = {
+          trackingId: trackingId ?? '',
+          distributionZoneId: distributionZoneId ?? null,
+          enteredAt: zone.properties.enteredAtTime,
+          exitedAt: new Date().toLocaleString('sv-SE', {
+            timeZone: 'UTC',
+            hour12: false,
+          }),
+        };
+        const eventID = zone.properties.id;
+        setDetailEventLog((v) => [
+          ...v,
+          'Zone event payload: ' + JSON.stringify(formattedZone),
+        ]);
+        //Call the API
+        setApiCallStatus('Attempting to store event');
+        return sendEventToServer(eventID, formattedZone, zone.properties.id);
       });
 
       await Promise.all(promiseArr)

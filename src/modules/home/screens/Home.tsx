@@ -1,14 +1,13 @@
 import React, { FC, useEffect, useState } from 'react';
 import styled from 'styled-components/native';
 import {
-  SubTitle,
-  Screen,
-  LargeTitle,
   Body,
   Button,
-  ActivityIndicator,
+  LargeTitle,
+  Screen,
+  SubTitle,
+  Title,
 } from '@src/components';
-
 import Slider from '@react-native-community/slider';
 import { useTheme } from 'styled-components';
 import { Platform, TouchableWithoutFeedback } from 'react-native';
@@ -156,15 +155,14 @@ export const HomeScreen: FC = () => {
             <TouchableWithoutFeedback onPress={handleTripleTap}>
               <StyledSubTitle>Inom spårningsområde</StyledSubTitle>
             </TouchableWithoutFeedback>
-            <ActivityIndicator size={100} />
-            <TimerContainer>
+            <StyledScrollView>
               {userZones.map((zone) => (
-                <>
-                  <LargeTitle>{zone.properties.name}</LargeTitle>
+                <ZoneContainer key={zone.properties.id}>
+                  <Title>{zone.properties.name}</Title>
                   <Body>{zone.properties.address}</Body>
-                </>
+                </ZoneContainer>
               ))}
-            </TimerContainer>
+            </StyledScrollView>
           </>
         ) : (
           <>
@@ -248,6 +246,11 @@ const TimerContainer = styled.View`
   border-radius: 15px;
   margin: 10px;
   align-items: center;
+  gap: 8px;
+`;
+
+const ZoneContainer = styled.View`
+  align-items: center;
 `;
 
 const StyledTimerText = styled(LargeTitle)``;
@@ -289,4 +292,20 @@ const StyleButton = styled(Button)`
 const StyledSlider = styled(Slider)`
   width: 100%;
   height: 40px;
+`;
+
+const StyledScrollView = styled.ScrollView.attrs(() => ({
+  contentContainerStyle: {
+    paddingVertical: 22,
+    paddingHorizontal: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+}))`
+  max-height: 150px;
+  background-color: ${({ theme }) => theme.colors.primary.backgroundHighlight};
+  padding: ${({ theme }) => `${theme.space.lg} ${theme.space.xxl}`};
+  border-radius: 15px;
+  margin: 10px;
 `;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import styled from 'styled-components/native';
@@ -8,6 +8,10 @@ import { HomeStack } from './HomeStack';
 import { useLocationPermission } from '@src/hooks/useLocationPermission';
 import { PermissionNotGranted } from '@src/modules/permissionNotGranted/screens';
 import { LocationBackgroundPermissionNeeded } from '../locationBackgroundPermissionNeeded/screens';
+import {
+  BatteryOptEnabled,
+  RequestDisableOptimization,
+} from 'react-native-battery-optimization-check';
 
 const Container = styled.View`
   flex: 1;
@@ -25,6 +29,14 @@ export const Navigation = () => {
     isLocationPermissionDenied,
     isLocationBackgroundPermissionNeeded,
   } = useLocationPermission();
+
+  useEffect(() => {
+    BatteryOptEnabled().then((isEnabled) => {
+      if (isEnabled) {
+        RequestDisableOptimization();
+      }
+    });
+  }, []);
 
   if (!isLocationPermissionGranted) {
     return <PermissionNotGranted isDenied={isLocationPermissionDenied} />;

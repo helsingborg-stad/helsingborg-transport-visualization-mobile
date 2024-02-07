@@ -12,11 +12,13 @@
     },
     "preview": {
       "distribution": "internal",
+      "channel": "preview",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://helsingborg-transport-visualization-backend-3ca3faqvfa-lz.a.run.app"
       }
     },
     "production": {
+      "channel": "production",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://helsingborg-transport-visualization-backend-umfrisc3pa-lz.a.run.app"
       }

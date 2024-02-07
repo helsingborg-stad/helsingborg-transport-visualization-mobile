@@ -25,7 +25,7 @@ const Map: FC = () => {
         style={{ flex: 1 }}
         provider={PROVIDER_GOOGLE}
         mapPadding={{ top: 0, left: 0, right: 0, bottom: 0 }}
-        showsUserLocation={false}
+        showsUserLocation={!location}
         followsUserLocation={true}
         showsMyLocationButton={false}
         showsCompass={false}
@@ -34,12 +34,16 @@ const Map: FC = () => {
         showsPointsOfInterest={false}
         showsIndoorLevelPicker={false}
         pitchEnabled={false}
-        region={{
-          latitude: location?.latitude || 0,
-          longitude: location?.longitude || 0,
-          latitudeDelta: 0.002,
-          longitudeDelta: 0.002,
-        }}
+        region={
+          location
+            ? {
+                latitude: location.latitude,
+                longitude: location.longitude,
+                latitudeDelta: 0.002,
+                longitudeDelta: 0.002,
+              }
+            : undefined
+        }
       >
         {location && (
           <Marker

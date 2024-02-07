@@ -4,6 +4,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   slug: 'helsingborg-app',
   name: 'Sam',
+  updates: {
+    url: 'https://u.expo.dev/66d00a50-a329-4419-b6b6-b59557721210',
+  },
+  runtimeVersion: {
+    policy: 'sdkVersion',
+  },
   android: {
     ...config.android,
     config: {
