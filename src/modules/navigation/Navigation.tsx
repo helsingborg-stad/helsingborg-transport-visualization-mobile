@@ -12,6 +12,7 @@ import {
   BatteryOptEnabled,
   RequestDisableOptimization,
 } from 'react-native-battery-optimization-check';
+import * as Notifications from 'expo-notifications';
 
 const Container = styled.View`
   flex: 1;
@@ -24,6 +25,8 @@ export const Navigation = () => {
   const { isLoading, isLoggedIn, isTokenExpired } = useAuthContext();
   const [locationBgPermissionStatus, setLocationBgPermissionStatus] =
     useState(false);
+  const [batteryOptimization, setBatteryOptimization] = useState(true);
+
   const {
     isLocationPermissionGranted,
     isLocationPermissionDenied,
@@ -31,12 +34,33 @@ export const Navigation = () => {
   } = useLocationPermission();
 
   useEffect(() => {
-    BatteryOptEnabled().then((isEnabled) => {
-      if (isEnabled) {
-        RequestDisableOptimization();
-      }
-    });
+    const checkBatteryOptimization = async () => {
+      const isEnabled: boolean = await BatteryOptEnabled();
+      setBatteryOptimization(isEnabled);
+    };
+
+    const getNotificationPermission = async () => {
+      await Notifications.requestPermissionsAsync();
+    };
+
+    const initCheck = async () => {
+      await checkBatteryOptimization();
+      await getNotificationPermission();
+    };
+
+    initCheck();
   }, []);
+
+  useEffect(() => {
+    const requestBatteryOptimization = async () => {
+      if (batteryOptimization) {
+        RequestDisableOptimization();
+        setBatteryOptimization(false);
+      }
+    };
+
+    requestBatteryOptimization();
+  }, [batteryOptimization]);
 
   if (!isLocationPermissionGranted) {
     return <PermissionNotGranted isDenied={isLocationPermissionDenied} />;
@@ -49,7 +73,7 @@ export const Navigation = () => {
     );
   }
 
-  if (isLoading) {
+  if (isLoading || batteryOptimization) {
     return (
       <Container>
         <ActivityIndicator

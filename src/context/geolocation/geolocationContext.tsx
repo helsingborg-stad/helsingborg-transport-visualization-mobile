@@ -2,15 +2,19 @@
 
 import React, {
   createContext,
-  useContext,
   FC,
   ReactNode,
+  useContext,
   useEffect,
   useState,
 } from 'react';
-import { LocationObject, LocationObjectCoords } from 'expo-location';
-import { ZoneFeature, Zones } from '@src/modules/home/types';
 import * as Location from 'expo-location';
+import {
+  LocationActivityType,
+  LocationObject,
+  LocationObjectCoords,
+} from 'expo-location';
+import { ZoneFeature, Zones } from '@src/modules/home/types';
 import * as TaskManager from 'expo-task-manager';
 import {
   LOCATION_SERVICE_CALL_INTERVAL_TIME,
@@ -93,15 +97,15 @@ export const GeolocationProvider: FC<GeolocationProviderProps> = ({
     await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
       // For better logs, we set the accuracy to the most sensitive option
       accuracy: Location.Accuracy.Highest,
+      activityType: LocationActivityType.AutomotiveNavigation,
       timeInterval: LOCATION_SERVICE_CALL_INTERVAL_TIME,
       distanceInterval: 1,
       // Make sure to enable this notification if you want to consistently tr∂ack in the background
       showsBackgroundLocationIndicator: true,
       mayShowUserSettingsDialog: true,
       foregroundService: {
-        notificationTitle: 'Location',
-        notificationBody: 'Location tracking in background',
-        notificationColor: '#fff',
+        notificationTitle: 'Plats',
+        notificationBody: 'Platsspårning i bakgrunden',
       },
     });
 

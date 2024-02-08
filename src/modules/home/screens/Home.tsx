@@ -20,6 +20,15 @@ import { LOCATION_TASK_NAME } from '@src/utils/Constants';
 import { DebugModal } from '../components/DebugModal';
 import Map from '@src/modules/home/components/Map/Map';
 import { useGeolocationContext } from '@src/context/geolocation/geolocationContext';
+import * as Notifications from 'expo-notifications';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 
 export const HomeScreen: FC = () => {
   const { logout } = useAuthContext();

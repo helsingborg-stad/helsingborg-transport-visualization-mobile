@@ -8,7 +8,11 @@ import { useGetAllZones } from '@src/modules/home/hooks/useGetAllZones';
 import { ZoneFeature } from '../types';
 import { LocationObjectCoords } from 'expo-location';
 import { EventRequestType } from '@src/api/types';
-import { MIN_DURATION_IN_ZONE } from '@src/utils/Constants';
+import {
+  MIN_DURATION_IN_ZONE,
+  PUSH_NOTIFICATION_DURATION,
+} from '@src/utils/Constants';
+import * as Notifications from 'expo-notifications';
 
 export function useEventTask(stopLocationUpdates) {
   const [isServiceCalled, setIsServiceCalled] = useState(false);
@@ -96,6 +100,37 @@ export function useEventTask(stopLocationUpdates) {
     }
   };
 
+  const scheduleAndDismissNotification = async (title, body) => {
+    const notificationId = await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+        sound: false,
+        priority: 'high',
+      },
+      trigger: null,
+    });
+
+    // Dismiss the notification after the specified duration
+    setTimeout(() => {
+      Notifications.dismissNotificationAsync(notificationId);
+    }, PUSH_NOTIFICATION_DURATION);
+  };
+
+  const handleOnEnterNotification = (zone: ZoneFeature) => {
+    scheduleAndDismissNotification(
+      `Gick in i zonen ${zone.properties.name}`,
+      zone.properties.address
+    );
+  };
+
+  const handleOnLeaveNotification = (zone: ZoneFeature) => {
+    scheduleAndDismissNotification(
+      `Lämnade zonen ${zone.properties.name}`,
+      zone.properties.address
+    );
+  };
+
   const EventTask = async (location: LocationObjectCoords) => {
     // if zones or location is not available then we cannot do anything
     // just return
@@ -154,6 +189,8 @@ export function useEventTask(stopLocationUpdates) {
         const isInsideZone = turf.booleanPointInPolygon(pt, zone);
         if (isInsideZone) return true;
 
+        handleOnLeaveNotification(zone);
+
         const zoneExitTime = new Date(
           new Date().toLocaleString('sv-SE', {
             timeZone: 'UTC',
@@ -176,6 +213,7 @@ export function useEventTask(stopLocationUpdates) {
           ...v,
           'No longer Inside this zone: ' + zone?.properties?.name,
         ]);
+
         if (
           zone.properties.type &&
           zone.properties.type.toLowerCase() === 'distribution'
@@ -192,6 +230,7 @@ export function useEventTask(stopLocationUpdates) {
             distributionZoneId = distributionObject.distributionZoneId;
           }
         }
+
         const formattedZone = {
           trackingId: trackingId ?? '',
           distributionZoneId: distributionZoneId ?? null,
@@ -201,6 +240,7 @@ export function useEventTask(stopLocationUpdates) {
             hour12: false,
           }),
         };
+
         const eventID = zone.properties.id;
         setDetailEventLog((v) => [
           ...v,
@@ -282,9 +322,8 @@ export function useEventTask(stopLocationUpdates) {
     //After its done -> just move on as normal flow
     const features = zones.features;
     let tmpUserZones: ZoneFeature[] = [];
-    features.forEach(async (zone) => {
-      const poly = zone;
-      const isInsideZone = turf.booleanPointInPolygon(pt, poly);
+    for (const zone of features) {
+      const isInsideZone = turf.booleanPointInPolygon(pt, zone);
       if (isInsideZone) {
         zone.properties.enteredAtTime = new Date().toLocaleString('sv-SE', {
           timeZone: 'UTC',
@@ -294,9 +333,18 @@ export function useEventTask(stopLocationUpdates) {
           setDistributionZone(zone);
           setIsInsideDistributionZone(true);
         }
+
+        if (
+          !tmpUserZones.find((z) => z.properties.id === zone.properties.id) &&
+          (!zonesToSend ||
+            !zonesToSend.find((z) => z.properties.id === zone.properties.id))
+        ) {
+          handleOnEnterNotification(zone);
+        }
+
         tmpUserZones = [...tmpUserZones, zone];
       }
-    });
+    }
 
     setDetailEventLog((v) => [
       ...v,
