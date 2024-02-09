@@ -82,6 +82,7 @@ export const HomeScreen: FC = () => {
       if (!isRegistered && status?.toLowerCase() === 'available') {
         try {
           await AsyncStorage.removeItem('zonesToSend');
+          await AsyncStorage.removeItem('recordedLocations');
           await AsyncStorage.removeItem('distributionId');
           setOldStateDeleted('Old state deleted when start the service');
         } catch (error) {
@@ -134,6 +135,7 @@ export const HomeScreen: FC = () => {
   const toggleLocationService = async () => {
     if (isTracking) {
       await stopLocationUpdates();
+      await AsyncStorage.removeItem('recordedLocations');
       setIsChangingServiceStatus(true);
       setIsTracking(false);
       logout();
@@ -141,6 +143,7 @@ export const HomeScreen: FC = () => {
       //we reset the local state every time we start the service
       try {
         await AsyncStorage.removeItem('zonesToSend');
+        await AsyncStorage.removeItem('recordedLocations');
         await AsyncStorage.removeItem('distributionId');
         setOldStateDeleted('Old state deleted when start the service');
       } catch (error) {

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { postEvent } from '@src/api/zone';
 import * as turf from '@turf/turf';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -150,6 +150,11 @@ export function useEventTask(stopLocationUpdates) {
 
     setLocation(location);
     setRecordedLocations((prevLocations) => [...prevLocations, location]);
+    await writeToAsyncStorage(
+      'recordedLocations',
+      JSON.stringify([...recordedLocations, location])
+    );
+
     //END REMOVE
 
     if (!zones) {
@@ -382,6 +387,15 @@ export function useEventTask(stopLocationUpdates) {
     // Depending on the Closing timer set by Slider
     await shouldShutdownService();
   };
+
+  useEffect(() => {
+    const getRecordedLocations = async () => {
+      const locations = await readFromAsyncStorage('recordedLocations');
+      setRecordedLocations(locations || []);
+    };
+
+    getRecordedLocations();
+  }, []);
 
   return {
     EventTask,
