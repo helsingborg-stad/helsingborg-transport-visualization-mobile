@@ -69,11 +69,11 @@ export function useLocationPermission() {
 
     if (!isLocationServicesEnabled) {
       Alert.alert(
-        'Platsbaserade tjänster krävs',
-        'För att använda appen krävs att du aktiverar platsbaserade tjänster (GPS). Appen fungerar inte korrekt utan platsbaserade tjänster.',
+        'Sätt på platsbaserade tjänster',
+        'Sam använder GPS och därför behöver du sätta på platsbaserade tjänster.',
         [
           {
-            text: 'Aktivera Platsbaserade Tjänster',
+            text: 'Gå till inställningar',
             onPress: openLocationSettings,
           },
         ]

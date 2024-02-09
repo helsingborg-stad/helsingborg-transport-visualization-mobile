@@ -24,10 +24,11 @@ export const LocationBackgroundPermissionNeeded: React.FC<Props> = ({
           <StyledTitle>Ge appen platsåtkomst</StyledTitle>
           <ErrorText>
             För att Sam ska kunna spåra din plats behöver du aktivera
-            alternativet "Tillåt alltid" i inställningar.
+            alternativet <ErrorTextBold>"Tillåt alltid"</ErrorTextBold> i
+            inställningar.
           </ErrorText>
           <StyleButton
-            title={'Tillåt alltid” i inställningar'}
+            title={'“Tillåt alltid” i inställningar'}
             onPress={handlePermission}
             type="primary"
           />
@@ -66,6 +67,10 @@ const StyledTitle = styled(LargeTitle)`
 
 const ErrorText = styled(Body)`
   margin-top: ${({ theme }) => theme.space.sm};
+`;
+
+const ErrorTextBold = styled(Body)`
+  font-weight: 700;
 `;
 
 const StyleButton = styled(Button)`
