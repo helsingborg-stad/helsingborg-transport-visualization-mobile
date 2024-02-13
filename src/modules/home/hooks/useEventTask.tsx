@@ -251,6 +251,12 @@ export function useEventTask(stopLocationUpdates) {
           ...v,
           'Zone event payload: ' + JSON.stringify(formattedZone),
         ]);
+
+        scheduleAndDismissNotification(
+          `Leverans loggad till zonen ${zone.properties.name}`,
+          zone.properties.address
+        );
+
         //Call the API
         setApiCallStatus('Attempting to store event');
         return sendEventToServer(eventID, formattedZone, zone.properties.id);
