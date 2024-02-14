@@ -96,7 +96,7 @@ export const GeolocationProvider: FC<GeolocationProviderProps> = ({
     console.log('starting the task');
     await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
       // For better logs, we set the accuracy to the most sensitive option
-      accuracy: Location.Accuracy.Highest,
+      accuracy: Location.Accuracy.BestForNavigation,
       activityType: LocationActivityType.AutomotiveNavigation,
       timeInterval: LOCATION_SERVICE_CALL_INTERVAL_TIME,
       distanceInterval: 1,

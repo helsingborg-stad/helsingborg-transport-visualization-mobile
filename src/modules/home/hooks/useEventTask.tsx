@@ -142,12 +142,6 @@ export function useEventTask(stopLocationUpdates) {
 
     serviceTimeRef.current = Date.now();
 
-    //Dev only - Remove after Petter test the app
-    // setIsServiceCalled(true);
-    // setTimeout(() => {
-    //   setIsServiceCalled(false);
-    // }, 3000);
-
     setLocation(location);
     setRecordedLocations((prevLocations) => [...prevLocations, location]);
     await writeToAsyncStorage(
