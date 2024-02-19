@@ -50,7 +50,8 @@
     "react-native-uuid": "^2.0.1",
     "react-native-wheely": "^0.6.0",
     "styled-components": "^5.3.10",
-    "expo-notifications": "~0.20.1"
+    "expo-notifications": "~0.20.1",
+    "react-native-pager-view": "6.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

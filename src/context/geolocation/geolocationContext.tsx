@@ -21,6 +21,7 @@ import {
   LOCATION_TASK_NAME,
 } from '@src/utils/Constants';
 import { useEventTask } from '@src/modules/home/hooks/useEventTask';
+import { TrackingEvent } from '@src/api/types';
 
 interface GeolocationContextProps {
   isServiceClosed: boolean;
@@ -30,6 +31,7 @@ interface GeolocationContextProps {
   apiCallStatus: string;
   zones: Zones;
   userZones: ZoneFeature[];
+  trackedEvents: TrackingEvent[];
   distributionZone: ZoneFeature;
   isInsideDistributionZone: boolean;
   detailEventLog: string[];
@@ -141,6 +143,7 @@ export const GeolocationProvider: FC<GeolocationProviderProps> = ({
     apiCallStatus,
     zones,
     userZones,
+    trackedEvents,
     distributionZone,
     isInsideDistributionZone,
     detailEventLog,
@@ -164,6 +167,7 @@ export const GeolocationProvider: FC<GeolocationProviderProps> = ({
         zones,
         userZones,
         distributionZone,
+        trackedEvents,
         isInsideDistributionZone,
         detailEventLog,
         serviceStatus,
