@@ -1,4 +1,6 @@
 // Auth
+import { ZoneFeature } from '@src/modules/home/types';
+
 export type LoginRequest = {
   identifier: string;
   pinCode: string;
@@ -28,6 +30,14 @@ export type OrganisationResponse = {
 export type EventRequestType = {
   trackingId: string;
   distributionZoneId: string;
+  enteredAt: string;
+  exitedAt: string;
+};
+
+export type TrackingEvent = {
+  trackingId: string;
+  distributionZoneId?: string;
+  zone: ZoneFeature;
   enteredAt: string;
   exitedAt: string;
 };

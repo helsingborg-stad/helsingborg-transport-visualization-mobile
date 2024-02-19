@@ -7,7 +7,7 @@ import { User } from '@src/context/auth/AuthTypes';
 import { useGetAllZones } from '@src/modules/home/hooks/useGetAllZones';
 import { ZoneFeature } from '../types';
 import { LocationObjectCoords } from 'expo-location';
-import { EventRequestType } from '@src/api/types';
+import { EventRequestType, TrackingEvent } from '@src/api/types';
 import {
   MIN_DURATION_IN_ZONE,
   PUSH_NOTIFICATION_DURATION,
@@ -23,6 +23,7 @@ export function useEventTask(stopLocationUpdates) {
   >([]);
   const [apiCallStatus, setApiCallStatus] = useState<string>('');
   const [userZones, setUserZones] = useState<ZoneFeature[]>([]);
+  const [trackedEvents, setTrackedEvents] = useState<TrackingEvent[]>([]);
   //
   const [distributionZone, setDistributionZone] = useState<ZoneFeature>();
   const [isInsideDistributionZone, setIsInsideDistributionZone] =
@@ -240,6 +241,25 @@ export function useEventTask(stopLocationUpdates) {
           }),
         };
 
+        await writeToAsyncStorage(
+          'trackedEvents',
+          JSON.stringify([
+            ...trackedEvents,
+            {
+              ...formattedZone,
+              zone: zone,
+            },
+          ])
+        );
+
+        setTrackedEvents((current) => [
+          ...current,
+          {
+            ...formattedZone,
+            zone: zone,
+          },
+        ]);
+
         const eventID = zone.properties.id;
         setDetailEventLog((v) => [
           ...v,
@@ -394,7 +414,13 @@ export function useEventTask(stopLocationUpdates) {
       setRecordedLocations(locations || []);
     };
 
+    const getTrackedEvents = async () => {
+      const events = await readFromAsyncStorage('trackedEvents');
+      setTrackedEvents(events || []);
+    };
+
     getRecordedLocations();
+    getTrackedEvents();
   }, []);
 
   return {
@@ -406,6 +432,7 @@ export function useEventTask(stopLocationUpdates) {
     apiCallStatus,
     zones,
     userZones,
+    trackedEvents,
     distributionZone,
     isInsideDistributionZone,
     detailEventLog,
