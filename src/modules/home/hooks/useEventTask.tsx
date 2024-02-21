@@ -13,6 +13,7 @@ import {
   PUSH_NOTIFICATION_DURATION,
 } from '@src/utils/Constants';
 import * as Notifications from 'expo-notifications';
+import { readFromAsyncStorage, writeToAsyncStorage } from '@src/utils/storage';
 
 export function useEventTask(stopLocationUpdates) {
   const [isServiceCalled, setIsServiceCalled] = useState(false);
@@ -81,26 +82,6 @@ export function useEventTask(stopLocationUpdates) {
     }
   };
 
-  const readFromAsyncStorage = async (key: string) => {
-    try {
-      let jsonObject = null;
-      const jsonValue = await AsyncStorage.getItem(key);
-      jsonObject = jsonValue != null ? JSON.parse(jsonValue) : null;
-      return jsonObject;
-    } catch (e) {
-      console.log('Failed to read ' + key);
-      return null;
-    }
-  };
-
-  const writeToAsyncStorage = async (key: string, value: string) => {
-    try {
-      await AsyncStorage.setItem(key, value);
-    } catch (e) {
-      console.log('Failed to save ' + key + ' in LocalStorage');
-    }
-  };
-
   const scheduleAndDismissNotification = async (title, body) => {
     const notificationId = await Notifications.scheduleNotificationAsync({
       content: {
@@ -128,6 +109,13 @@ export function useEventTask(stopLocationUpdates) {
   const handleOnLeaveNotification = (zone: ZoneFeature) => {
     scheduleAndDismissNotification(
       `Lämnade zonen ${zone.properties.name}`,
+      zone.properties.address
+    );
+  };
+
+  const handleOnDeliverNotification = (zone: ZoneFeature) => {
+    scheduleAndDismissNotification(
+      `Leverans loggad till zonen ${zone.properties.name}`,
       zone.properties.address
     );
   };
@@ -209,6 +197,23 @@ export function useEventTask(stopLocationUpdates) {
 
         if (isInsideZone) return;
 
+        const lasTrackedEvent =
+          trackedEvents && trackedEvents.length > 0 ? trackedEvents[0] : null;
+        if (
+          lasTrackedEvent &&
+          zone.properties.id === lasTrackedEvent.zone.properties.id &&
+          zone.properties.enteredAtTime ===
+            lasTrackedEvent.zone.properties.enteredAtTime
+        ) {
+          console.log(
+            `${zone.properties.id} from zonesToSend already in TrackedEvents!`
+          );
+
+          return new Promise((resolve) => {
+            resolve(zone.properties.id);
+          });
+        }
+
         setDetailEventLog((v) => [
           ...v,
           'No longer Inside this zone: ' + zone?.properties?.name,
@@ -244,20 +249,20 @@ export function useEventTask(stopLocationUpdates) {
         await writeToAsyncStorage(
           'trackedEvents',
           JSON.stringify([
-            ...trackedEvents,
             {
               ...formattedZone,
               zone: zone,
             },
+            ...trackedEvents,
           ])
         );
 
         setTrackedEvents((current) => [
-          ...current,
           {
             ...formattedZone,
             zone: zone,
           },
+          ...current,
         ]);
 
         const eventID = zone.properties.id;
@@ -266,10 +271,7 @@ export function useEventTask(stopLocationUpdates) {
           'Zone event payload: ' + JSON.stringify(formattedZone),
         ]);
 
-        scheduleAndDismissNotification(
-          `Leverans loggad till zonen ${zone.properties.name}`,
-          zone.properties.address
-        );
+        handleOnDeliverNotification(zone);
 
         //Call the API
         setApiCallStatus('Attempting to store event');

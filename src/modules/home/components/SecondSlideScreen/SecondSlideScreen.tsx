@@ -12,6 +12,7 @@ import { FlatList, View } from 'react-native';
 import { TrackingEvent } from '@src/api/types';
 import DistributionCenter from '@src/components/icons/DistributionCenter';
 import Delivery from '@src/components/icons/Delivery';
+import { UTCToLocal } from '@src/utils/date';
 
 interface SecondSlideScreenProps {
   key: number;
@@ -41,7 +42,8 @@ export const SecondSlideScreen: FC<SecondSlideScreenProps> = ({
             <ListItem key={item.trackingId}>
               <View>
                 <Circle>
-                  {item.distributionZoneId ? (
+                  {item.zone.properties.type &&
+                  item.zone.properties.type.toLowerCase() === 'distribution' ? (
                     <DistributionCenter />
                   ) : (
                     <Delivery />
@@ -52,12 +54,12 @@ export const SecondSlideScreen: FC<SecondSlideScreenProps> = ({
                 <StyledSubtitle>{item.zone.properties.name}</StyledSubtitle>
                 <StyledBody>{item.zone.properties.address}</StyledBody>
                 <StyledBody>
-                  {new Date(item.enteredAt).toLocaleTimeString([], {
+                  {UTCToLocal(item.enteredAt).toLocaleTimeString('se-SV', {
                     hour: '2-digit',
                     minute: '2-digit',
                   })}{' '}
                   -{' '}
-                  {new Date(item.exitedAt).toLocaleTimeString([], {
+                  {UTCToLocal(item.exitedAt).toLocaleTimeString('se-SV', {
                     hour: '2-digit',
                     minute: '2-digit',
                   })}
