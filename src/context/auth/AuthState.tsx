@@ -12,7 +12,8 @@ import { ActionType, AuthContextProps, User } from './AuthTypes';
 
 export const AuthStore = () => {
   const initialState = {
-    trackingId: '',
+    deviceId: '',
+    sessionId: '',
     token: '',
     id: '',
     orgNumber: '',
@@ -43,7 +44,8 @@ export const AuthStore = () => {
       dispatch({
         type: ActionType.LOGIN,
         payload: {
-          trackingId: user.trackingId,
+          deviceId: user.deviceId,
+          sessionId: user.sessionId,
           token: user.token,
           isLoggedIn: user.isLoggedIn,
           isTokenExpired: tokenStatus,
@@ -81,7 +83,8 @@ export const AuthStore = () => {
       dispatch({
         type: ActionType.LOGIN,
         payload: {
-          trackingId: '',
+          sessionId: '',
+          deviceId: user.deviceId,
           token: user.token,
           isLoggedIn: user.isLoggedIn,
           isTokenExpired: user.isTokenExpired,

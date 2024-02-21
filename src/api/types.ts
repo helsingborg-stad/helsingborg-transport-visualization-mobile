@@ -29,6 +29,8 @@ export type OrganisationResponse = {
 
 export type EventRequestType = {
   trackingId: string;
+  sessionId: string;
+  deviceId: string;
   distributionZoneId: string;
   enteredAt: string;
   exitedAt: string;
@@ -36,6 +38,8 @@ export type EventRequestType = {
 
 export type TrackingEvent = {
   trackingId: string;
+  sessionId: string;
+  deviceId: string;
   distributionZoneId?: string;
   zone: ZoneFeature;
   enteredAt: string;
