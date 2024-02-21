@@ -39,7 +39,9 @@ export const SecondSlideScreen: FC<SecondSlideScreenProps> = ({
         <FlatList
           data={trackedEvents}
           renderItem={({ item }) => (
-            <ListItem key={item.trackingId}>
+            <ListItem
+              key={`${item.zone.properties.id}-${item.enteredAt}-${item.exitedAt}`}
+            >
               <View>
                 <Circle>
                   {item.zone.properties.type &&

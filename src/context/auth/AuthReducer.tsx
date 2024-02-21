@@ -5,7 +5,8 @@ export const reducer = (state: AuthState, action: Action) => {
     case ActionType.LOGIN:
       return {
         ...state,
-        trackingId: action.payload.trackingId,
+        deviceId: action.payload.deviceId,
+        sessionId: action.payload.sessionId,
         token: action.payload.token,
         isLoggedIn: action.payload.isLoggedIn,
         isTokenExpired: action.payload.isTokenExpired,

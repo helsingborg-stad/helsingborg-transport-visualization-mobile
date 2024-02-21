@@ -26,6 +26,7 @@ import { useAuthContext } from '@src/context/auth/AuthState';
 import { User } from '@src/context/auth/AuthTypes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StoredServiceTimeType } from './types';
+import DeviceInfo from 'react-native-device-info';
 
 export const LoginScreen: FC = () => {
   const theme = useTheme();
@@ -141,22 +142,24 @@ export const LoginScreen: FC = () => {
     };
     login(payload)
       .then(async (data: LoginResponse) => {
-        let trackingId = null;
+        let deviceId = null;
         //check if we already have a tracking id in secure store
         const userStr = await SecureStore.getItemAsync('user');
         const user: User = JSON.parse(userStr);
 
-        if (user && user.trackingId) {
-          trackingId = user.trackingId;
+        if (user && user.deviceId) {
+          deviceId = user.deviceId;
         } else {
           //generate a new tracking id
-          trackingId = uuid.v4();
+          deviceId = await DeviceInfo.getUniqueId();
         }
+
         const extraKeys = {
           pin: pin,
           isLoggedIn: true,
           isTokenExpired: false,
-          trackingId: trackingId,
+          sessionId: uuid.v4().toString(),
+          deviceId,
         };
 
         const userObj = { ...data, ...extraKeys };

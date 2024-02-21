@@ -159,12 +159,14 @@ export function useEventTask(stopLocationUpdates) {
     if (zonesToSend) {
       //Get Tracking ID
       //check if we already have a tracking id in local storage
-      let trackingId = '';
+      let sessionId = '';
+      let deviceId = '';
       const userStr = await SecureStore.getItemAsync('user');
       const user: User = JSON.parse(userStr);
 
       if (user) {
-        trackingId = user.trackingId;
+        sessionId = user.sessionId;
+        deviceId = user.deviceId;
       }
 
       let distributionZoneId = null;
@@ -237,7 +239,9 @@ export function useEventTask(stopLocationUpdates) {
         }
 
         const formattedZone = {
-          trackingId: trackingId ?? '',
+          trackingId: sessionId ?? '',
+          sessionId: sessionId ?? '',
+          deviceId: deviceId ?? '',
           distributionZoneId: distributionZoneId ?? null,
           enteredAt: zone.properties.enteredAtTime,
           exitedAt: new Date().toLocaleString('sv-SE', {
