@@ -2,7 +2,7 @@
   "expo": {
     "slug": "helsingborg-app",
     "name": "Sam",
-    "version": "1.1.7",
+    "version": "1.1.8",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,7 +16,7 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "buildNumber": "1.1.7",
+      "buildNumber": "1.1.8",
       "supportsTablet": true,
       "bundleIdentifier": "works.hbg.sam",
       "infoPlist": {
@@ -24,7 +24,7 @@
       }
     },
     "android": {
-      "versionCode": 7,
+      "versionCode": 118,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
