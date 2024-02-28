@@ -50,12 +50,12 @@
     "production": {
       "extends": "base",
       "channel": "production",
-      "autoIncrement": true
+      "autoIncrement": true,
       "env": {
         "APP_ENV": "production",
         "EXPO_PUBLIC_API_URL": "https://helsingborg-transport-visualization-backend-umfrisc3pa-lz.a.run.app"
       }
-    },
+    }
   },
   "submit": {
     "production": {
