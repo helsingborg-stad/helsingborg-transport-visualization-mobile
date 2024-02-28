@@ -4,6 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import WheelPicker from 'react-native-wheely';
 import * as SecureStore from 'expo-secure-store';
 import uuid from 'react-native-uuid';
+import { A } from '@expo/html-elements';
 
 import {
   Button,
@@ -27,6 +28,7 @@ import { User } from '@src/context/auth/AuthTypes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StoredServiceTimeType } from './types';
 import DeviceInfo from 'react-native-device-info';
+import { PRIVACY_POLICY } from '@src/utils/Constants';
 
 export const LoginScreen: FC = () => {
   const theme = useTheme();
@@ -283,6 +285,7 @@ export const LoginScreen: FC = () => {
             isLoading={isLoggingIn}
           />
         )}
+        <StyledLink href={PRIVACY_POLICY}>Personuppgiftspolicy</StyledLink>
       </Wrapper>
 
       <StyledModal visible={showOrganizationPopup}>
@@ -346,6 +349,11 @@ const StyledTitle = styled(LargeTitle)`
 
 const StyledSubTitle = styled(SubTitle)`
   margin: ${({ theme }) => `${theme.space.sm} 0`};
+`;
+
+const StyledLink = styled(A)`
+  align-self: center;
+  text-decoration-line: underline;
 `;
 
 const StyledOrganizationPressable = styled.TouchableOpacity``;
