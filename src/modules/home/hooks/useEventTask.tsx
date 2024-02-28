@@ -1,24 +1,32 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { postEvent } from '@src/api/zone';
 import * as turf from '@turf/turf';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
-import { LOCATION_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Constants';
 import { User } from '@src/context/auth/AuthTypes';
 import { useGetAllZones } from '@src/modules/home/hooks/useGetAllZones';
 import { ZoneFeature } from '../types';
 import { LocationObjectCoords } from 'expo-location';
-import { EventRequestType } from '@src/api/types';
-import { stopBackgroundUpdate } from '../services/BackgroundLocationService';
+import { EventRequestType, TrackingEvent } from '@src/api/types';
+import {
+  MIN_DURATION_IN_ZONE,
+  PUSH_NOTIFICATION_DURATION,
+} from '@src/utils/Constants';
+import * as Notifications from 'expo-notifications';
+import { readFromAsyncStorage, writeToAsyncStorage } from '@src/utils/storage';
 
-export function useEventTask() {
+export function useEventTask(stopLocationUpdates) {
   const [isServiceCalled, setIsServiceCalled] = useState(false);
   const [isServiceClosed, setIsServiceClosed] = useState(false);
-  const [location, setLocation] = useState(null);
+  const [location, setLocation] = useState<LocationObjectCoords>();
+  const [recordedLocations, setRecordedLocations] = useState<
+    LocationObjectCoords[]
+  >([]);
   const [apiCallStatus, setApiCallStatus] = useState<string>('');
-  const [userZones, setUserZones] = useState<ZoneFeature[]>(null);
+  const [userZones, setUserZones] = useState<ZoneFeature[]>([]);
+  const [trackedEvents, setTrackedEvents] = useState<TrackingEvent[]>([]);
   //
-  const [distributionZone, setDistributionZone] = useState(null);
+  const [distributionZone, setDistributionZone] = useState<ZoneFeature>();
   const [isInsideDistributionZone, setIsInsideDistributionZone] =
     useState(false);
   const [detailEventLog, setDetailEventLog] = useState([]);
@@ -31,11 +39,11 @@ export function useEventTask() {
   //Test Only Methods: For Petter
   const setZoneNamesForUser = (zonesToParse: ZoneFeature[]) => {
     //Dev only - Remove after Petter test the app
-    let userZoneName = [];
+    let userZone = [];
     zonesToParse.forEach((zone) => {
-      userZoneName = [...userZoneName, zone.properties.name];
+      userZone = [...userZone, zone];
     });
-    setUserZones(userZoneName);
+    setUserZones(userZone);
     //END REMOVE
   };
 
@@ -63,7 +71,7 @@ export function useEventTask() {
         const currentTime = Date.now();
         if (currentTime > shutDownTime) {
           //We Shut down the tracking!
-          await stopBackgroundUpdate();
+          await stopLocationUpdates();
           setIsServiceClosed(true);
           setIsServiceCalled(false);
           setApiCallStatus('Inactive');
@@ -74,55 +82,68 @@ export function useEventTask() {
     }
   };
 
-  const readFromAsyncStorage = async (key: string) => {
-    try {
-      let jsonObject = null;
-      const jsonValue = await AsyncStorage.getItem(key);
-      jsonObject = jsonValue != null ? JSON.parse(jsonValue) : null;
-      return jsonObject;
-    } catch (e) {
-      console.log('Failed to read ' + key);
-      return null;
-    }
+  const scheduleAndDismissNotification = async (title, body) => {
+    const notificationId = await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+        sound: false,
+        priority: 'high',
+      },
+      trigger: null,
+    });
+
+    // Dismiss the notification after the specified duration
+    setTimeout(() => {
+      Notifications.dismissNotificationAsync(notificationId);
+    }, PUSH_NOTIFICATION_DURATION);
   };
 
-  const writeToAsyncStorage = async (key: string, value: string) => {
-    try {
-      await AsyncStorage.setItem(key, value);
-    } catch (e) {
-      console.log('Failed to save ' + key + ' in LocalStorage');
-    }
+  const handleOnEnterNotification = (zone: ZoneFeature) => {
+    scheduleAndDismissNotification(
+      `Gick in i zonen ${zone.properties.name}`,
+      zone.properties.address
+    );
+  };
+
+  const handleOnLeaveNotification = (zone: ZoneFeature) => {
+    scheduleAndDismissNotification(
+      `Lämnade zonen ${zone.properties.name}`,
+      zone.properties.address
+    );
+  };
+
+  const handleOnDeliverNotification = (zone: ZoneFeature) => {
+    scheduleAndDismissNotification(
+      `Leverans loggad till zonen ${zone.properties.name}`,
+      zone.properties.address
+    );
   };
 
   const EventTask = async (location: LocationObjectCoords) => {
     // if zones or location is not available then we cannot do anything
     // just return
-    if (!zones || !location) {
-      console.log('zones or location not ready yet');
+
+    if (!location) {
+      console.log('location not ready yet');
       return;
-    }
-    // If we have a service call and it is called again before the limit
-    // we do nothing
-    if (serviceTimeRef.current) {
-      const currTime = Date.now();
-      const timeElapsed = currTime - serviceTimeRef.current;
-      if (timeElapsed < LOCATION_SERVICE_CALL_INTERVAL_TIME) {
-        console.log('Called Too Soon!');
-        return;
-      }
     }
 
     serviceTimeRef.current = Date.now();
 
-    //Dev only - Remove after Petter test the app
-    setIsServiceCalled(true);
-    setTimeout(() => {
-      setIsServiceCalled(false);
-    }, 3000);
-
     setLocation(location);
+    setRecordedLocations((prevLocations) => [...prevLocations, location]);
+    await writeToAsyncStorage(
+      'recordedLocations',
+      JSON.stringify([...recordedLocations, location])
+    );
+
     //END REMOVE
 
+    if (!zones) {
+      console.log('zones not ready yet');
+      return;
+    }
     setDetailEventLog((v) => [...v, '-------------------------']);
 
     // const pt = turf.point([24.688818841, 59.408275184]);
@@ -138,12 +159,14 @@ export function useEventTask() {
     if (zonesToSend) {
       //Get Tracking ID
       //check if we already have a tracking id in local storage
-      let trackingId = '';
+      let sessionId = '';
+      let deviceId = '';
       const userStr = await SecureStore.getItemAsync('user');
       const user: User = JSON.parse(userStr);
 
       if (user) {
-        trackingId = user.trackingId;
+        sessionId = user.sessionId;
+        deviceId = user.deviceId;
       }
 
       let distributionZoneId = null;
@@ -152,48 +175,109 @@ export function useEventTask() {
       //Check if type distribution is in Local storage
       const distributionObject = await readFromAsyncStorage('distributionId');
 
+      zonesToSend = zonesToSend.filter((zone) => {
+        const isInsideZone = turf.booleanPointInPolygon(pt, zone);
+        if (isInsideZone) return true;
+
+        handleOnLeaveNotification(zone);
+
+        const zoneExitTime = new Date(
+          new Date().toLocaleString('sv-SE', {
+            timeZone: 'UTC',
+            hour12: false,
+          })
+        ).getTime();
+
+        const enteredAtTime = new Date(zone.properties.enteredAtTime).getTime();
+        const durationInZone = zoneExitTime - enteredAtTime;
+
+        return durationInZone > MIN_DURATION_IN_ZONE;
+      });
+
       const promiseArr: Promise<string>[] = zonesToSend.map(async (zone) => {
-        const poly = zone;
-        const isInsideZone = turf.booleanPointInPolygon(pt, poly);
-        if (!isInsideZone) {
-          setDetailEventLog((v) => [
-            ...v,
-            'No longer Inside this zone: ' + zone?.properties?.name,
-          ]);
-          if (
-            zone.properties.type &&
-            zone.properties.type.toLowerCase() === 'distribution'
-          ) {
-            distributionZoneId = null;
-            setIsInsideDistributionZone(true);
-            setDistributionZone(zone);
-            await writeToAsyncStorage(
-              'distributionId',
-              JSON.stringify({ distributionZoneId: zone.properties.id })
-            );
-          } else {
-            if (distributionObject && distributionObject.distributionZoneId) {
-              distributionZoneId = distributionObject.distributionZoneId;
-            }
-          }
-          const formattedZone = {
-            trackingId: trackingId ?? '',
-            distributionZoneId: distributionZoneId ?? null,
-            enteredAt: zone.properties.enteredAtTime,
-            exitedAt: new Date().toLocaleString('sv-SE', {
-              timeZone: 'UTC',
-              hour12: false,
-            }),
-          };
-          const eventID = zone.properties.id;
-          setDetailEventLog((v) => [
-            ...v,
-            'Zone event payload: ' + JSON.stringify(formattedZone),
-          ]);
-          //Call the API
-          setApiCallStatus('Attempting to store event');
-          return sendEventToServer(eventID, formattedZone, zone.properties.id);
+        const isInsideZone = turf.booleanPointInPolygon(pt, zone);
+
+        if (isInsideZone) return;
+
+        const lasTrackedEvent =
+          trackedEvents && trackedEvents.length > 0 ? trackedEvents[0] : null;
+        if (
+          lasTrackedEvent &&
+          zone.properties.id === lasTrackedEvent.zone.properties.id
+        ) {
+          console.log(
+            `${zone.properties.id} from zonesToSend already in TrackedEvents!`
+          );
+
+          return new Promise((resolve) => {
+            resolve(zone.properties.id);
+          });
         }
+
+        setDetailEventLog((v) => [
+          ...v,
+          'No longer Inside this zone: ' + zone?.properties?.name,
+        ]);
+
+        if (
+          zone.properties.type &&
+          zone.properties.type.toLowerCase() === 'distribution'
+        ) {
+          distributionZoneId = null;
+          setIsInsideDistributionZone(true);
+          setDistributionZone(zone);
+          await writeToAsyncStorage(
+            'distributionId',
+            JSON.stringify({ distributionZoneId: zone.properties.id })
+          );
+        } else {
+          if (distributionObject && distributionObject.distributionZoneId) {
+            distributionZoneId = distributionObject.distributionZoneId;
+          }
+        }
+
+        const formattedZone = {
+          trackingId: sessionId ?? '',
+          sessionId: sessionId ?? '',
+          deviceId: deviceId ?? '',
+          distributionZoneId: distributionZoneId ?? null,
+          enteredAt: zone.properties.enteredAtTime,
+          exitedAt: new Date().toLocaleString('sv-SE', {
+            timeZone: 'UTC',
+            hour12: false,
+          }),
+        };
+
+        await writeToAsyncStorage(
+          'trackedEvents',
+          JSON.stringify([
+            {
+              ...formattedZone,
+              zone: zone,
+            },
+            ...trackedEvents,
+          ])
+        );
+
+        setTrackedEvents((current) => [
+          {
+            ...formattedZone,
+            zone: zone,
+          },
+          ...current,
+        ]);
+
+        const eventID = zone.properties.id;
+        setDetailEventLog((v) => [
+          ...v,
+          'Zone event payload: ' + JSON.stringify(formattedZone),
+        ]);
+
+        handleOnDeliverNotification(zone);
+
+        //Call the API
+        setApiCallStatus('Attempting to store event');
+        return sendEventToServer(eventID, formattedZone, zone.properties.id);
       });
 
       await Promise.all(promiseArr)
@@ -267,9 +351,8 @@ export function useEventTask() {
     //After its done -> just move on as normal flow
     const features = zones.features;
     let tmpUserZones: ZoneFeature[] = [];
-    features.forEach(async (zone) => {
-      const poly = zone;
-      const isInsideZone = turf.booleanPointInPolygon(pt, poly);
+    for (const zone of features) {
+      const isInsideZone = turf.booleanPointInPolygon(pt, zone);
       if (isInsideZone) {
         zone.properties.enteredAtTime = new Date().toLocaleString('sv-SE', {
           timeZone: 'UTC',
@@ -279,9 +362,18 @@ export function useEventTask() {
           setDistributionZone(zone);
           setIsInsideDistributionZone(true);
         }
+
+        if (
+          !tmpUserZones.find((z) => z.properties.id === zone.properties.id) &&
+          (!zonesToSend ||
+            !zonesToSend.find((z) => z.properties.id === zone.properties.id))
+        ) {
+          handleOnEnterNotification(zone);
+        }
+
         tmpUserZones = [...tmpUserZones, zone];
       }
-    });
+    }
 
     setDetailEventLog((v) => [
       ...v,
@@ -320,13 +412,31 @@ export function useEventTask() {
     await shouldShutdownService();
   };
 
+  useEffect(() => {
+    const getRecordedLocations = async () => {
+      const locations = await readFromAsyncStorage('recordedLocations');
+      setRecordedLocations(locations || []);
+    };
+
+    const getTrackedEvents = async () => {
+      const events = await readFromAsyncStorage('trackedEvents');
+      setTrackedEvents(events || []);
+    };
+
+    getRecordedLocations();
+    getTrackedEvents();
+  }, []);
+
   return {
     EventTask,
     isServiceCalled,
     isServiceClosed,
     location,
+    recordedLocations,
     apiCallStatus,
+    zones,
     userZones,
+    trackedEvents,
     distributionZone,
     isInsideDistributionZone,
     detailEventLog,

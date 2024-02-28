@@ -105,6 +105,8 @@ export const PinCodeInput: React.FC<PinCodeInputProps> = ({
         onBlur={handleOnBlur}
         //Workaround for caret if text aligned center - Android
         multiline={true}
+        returnKeyType="none"
+        blurOnSubmit={true}
         numberOfLines={1}
         style={{
           position: 'absolute',

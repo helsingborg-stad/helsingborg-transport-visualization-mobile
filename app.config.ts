@@ -1,40 +1,34 @@
-import 'dotenv/config';
 import { ExpoConfig, ConfigContext } from 'expo/config';
-
-const ENV = {
-  dev: {
-    apiUrl: process.env.API_URL,
-    easProjectID: process.env.EAS_PROJECT_ID,
-  },
-  staging: {
-    apiUrl: process.env.API_URL,
-    easProjectID: process.env.EAS_PROJECT_ID,
-  },
-  production: {
-    apiUrl: process.env.API_URL,
-    easProjectID: process.env.EAS_PROJECT_ID,
-  },
-};
-
-const getEnvVars = (env = process.env.APP_ENV) => {
-  if (env === 'production') {
-    return ENV.production;
-  }
-  if (env === 'staging') {
-    return ENV.staging;
-  }
-
-  return ENV.dev;
-};
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   slug: 'helsingborg-app',
   name: 'Sam',
+  updates: {
+    url: 'https://u.expo.dev/66d00a50-a329-4419-b6b6-b59557721210',
+  },
+  runtimeVersion: {
+    policy: 'sdkVersion',
+  },
+  android: {
+    ...config.android,
+    config: {
+      ...config.android.config,
+      googleMaps: {
+        apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_ANDROID_API_KEY,
+      },
+    },
+  },
+  ios: {
+    ...config.ios,
+    config: {
+      ...config.ios.config,
+      googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_IOS_API_KEY,
+    },
+  },
   extra: {
     eas: {
-      projectId: getEnvVars().easProjectID,
+      projectId: '66d00a50-a329-4419-b6b6-b59557721210',
     },
-    API_URL: getEnvVars().apiUrl,
   },
 });

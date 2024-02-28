@@ -4,18 +4,64 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
+    "base": {
+      "node": "18.18.0",
+      "android": {
+        "image": "default",
+        "env": {
+          "PLATFORM": "android"
+        }
+      },
+      "ios": {
+        "image": "macos-ventura-13.6-xcode-15.2",
+        "env": {
+          "PLATFORM": "ios"
+        }
+      }
     },
-    "preview": {
-      "distribution": "internal"
+    "development": {
+      "extends": "base",
+      "developmentClient": true,
+      "env": {
+        "APP_ENV": "development",
+        "EXPO_PUBLIC_API_URL": "https://helsingborg-transport-visualization-backend-3ca3faqvfa-lz.a.run.app"
+      },
+      "channel": "development",
+      "distribution": "internal",
+      "android": {
+        "withoutCredentials": true
+      },
+      "ios": {
+        "simulator": true
+      }
+    },
+    "staging": {
+      "extends": "base",
+      "channel": "staging",
+      "env": {
+        "APP_ENV": "staging",
+        "EXPO_PUBLIC_API_URL": "https://helsingborg-transport-visualization-backend-3ca3faqvfa-lz.a.run.app"
+      },
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
     },
     "production": {
+      "extends": "base",
+      "channel": "production",
       "autoIncrement": true
-    }
+      "env": {
+        "APP_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "https://helsingborg-transport-visualization-backend-umfrisc3pa-lz.a.run.app"
+      }
+    },
   },
   "submit": {
-    "production": {}
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./serviceAccountKey.json"
+      }
+    }
   }
 }

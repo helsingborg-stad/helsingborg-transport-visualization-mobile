@@ -9,6 +9,7 @@ import {
 } from '@src/components';
 import styled from 'styled-components/native';
 import { LOCATION_SERVICE_CALL_INTERVAL_TIME } from '@src/utils/Constants';
+import { ZoneFeature } from '@src/modules/home/types';
 
 type DebugModalProps = {
   isServiceClosed: boolean;
@@ -17,7 +18,7 @@ type DebugModalProps = {
   isInsideDistributionZone: boolean;
   distributionZone: any;
   location: any;
-  userZones: any;
+  userZones: ZoneFeature[];
   detailEventLog: any[];
   showDevInfoModal: boolean;
   setShowDevInfoModal: (val: boolean) => void;
@@ -115,7 +116,11 @@ export const DebugModal: React.FC<DebugModalProps> = ({
 
         <StyledUserZonesContainer>
           <StyledHeader>Zones:</StyledHeader>
-          {userZones && <StyledBody>{JSON.stringify(userZones)}</StyledBody>}
+          {userZones && (
+            <StyledBody>
+              {JSON.stringify(userZones.map((zone) => zone.properties.name))}
+            </StyledBody>
+          )}
         </StyledUserZonesContainer>
         <StyledScrollView>
           {detailEventLog.map((event, index) => (

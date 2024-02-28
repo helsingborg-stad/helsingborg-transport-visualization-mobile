@@ -11,7 +11,6 @@ import { ErrorBoundary } from '@src/modules/errorBoundary';
 import theme from '@src/theme/Theme';
 import { Navigation } from '@src/modules/navigation';
 import AuthProvider from '@src/context/auth/AuthState';
-import '@src/taskManager/TaskManager';
 
 export default function App() {
   const [areFontsLoaded] = useFonts(customFontsToLoad);

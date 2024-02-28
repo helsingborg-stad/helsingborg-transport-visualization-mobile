@@ -1,7 +1,13 @@
 import * as Location from 'expo-location';
 import { useEffect, useRef, useState } from 'react';
-import { AppState, AppStateStatus, Platform } from 'react-native';
-
+import {
+  Alert,
+  AppState,
+  AppStateStatus,
+  Linking,
+  Platform,
+} from 'react-native';
+import { startActivityAsync, ActivityAction } from 'expo-intent-launcher';
 //
 // https://github.com/expo/expo/issues/16701#issuecomment-1270111253
 //
@@ -44,9 +50,36 @@ export function useLocationPermission() {
     appState.current = nextAppState;
   };
 
+  const openLocationSettings = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        await startActivityAsync(ActivityAction.LOCATION_SOURCE_SETTINGS);
+      } catch (error) {
+        console.error('Error opening location settings:', error);
+      }
+    } else if (Platform.OS === 'ios') {
+      Linking.openURL('app-settings:');
+    }
+  };
+
   const getUserLocationPermission = async () => {
     const fgStatus = await Location.getForegroundPermissionsAsync();
     const bgStatus = await Location.getBackgroundPermissionsAsync();
+    const isLocationServicesEnabled = await Location.hasServicesEnabledAsync();
+
+    if (!isLocationServicesEnabled) {
+      Alert.alert(
+        'Sätt på platsbaserade tjänster',
+        'Sam använder GPS och därför behöver du sätta på platsbaserade tjänster.',
+        [
+          {
+            text: 'Gå till inställningar',
+            onPress: openLocationSettings,
+          },
+        ]
+      );
+      return;
+    }
 
     if (fgStatus.granted && bgStatus.granted) {
       setIsLocationPermissionGranted(true);
