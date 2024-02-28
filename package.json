@@ -11,7 +11,19 @@
     "lint": "eslint",
     "lint:fix": "eslint src/ --fix",
     "lint:style": "stylelint src/",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "build:development": "eas build --profile development --platform all",
+    "build:development:android": "eas build --profile development --platform android",
+    "build:development:ios": "eas build --profile development --platform ios",
+    "build:staging": "eas build --profile staging --platform all",
+    "build:staging:android": "eas build --profile staging --platform android",
+    "build:staging:ios": "eas build --profile staging --platform ios",
+    "build:production": "eas build --profile production --platform all",
+    "build:production:android": "eas build --profile production --platform android",
+    "build:production:ios": "eas build --profile production --platform ios",
+    "submit": "eas submit --platform all",
+    "submit:android": "eas submit --platform android",
+    "submit:ios": "eas submit --platform ios"
   },
   "dependencies": {
     "@expo-google-fonts/roboto": "^0.2.3",

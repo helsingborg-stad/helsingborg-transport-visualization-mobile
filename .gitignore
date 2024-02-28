@@ -24,3 +24,4 @@ ios
 .env.production
 .vscode
 .idea
+serviceAccountKey.*
