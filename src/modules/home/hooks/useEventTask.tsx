@@ -203,9 +203,7 @@ export function useEventTask(stopLocationUpdates) {
           trackedEvents && trackedEvents.length > 0 ? trackedEvents[0] : null;
         if (
           lasTrackedEvent &&
-          zone.properties.id === lasTrackedEvent.zone.properties.id &&
-          zone.properties.enteredAtTime ===
-            lasTrackedEvent.zone.properties.enteredAtTime
+          zone.properties.id === lasTrackedEvent.zone.properties.id
         ) {
           console.log(
             `${zone.properties.id} from zonesToSend already in TrackedEvents!`
